@@ -31,5 +31,44 @@ namespace PracaInzynierska
             return 0.5 * (1.0 + sign * y);
         }
 
+        public static List<double> DifferenceBetweenPairsOfMeasurements(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+
+            List<double> listOfDifference = new List<double>();
+            int n = Math.Max(list1.Count(), list2.Count());
+            if (list1.Count() == list2.Count())
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    if (list1.Count() < n)
+                        listOfDifference.Add(list2.ElementAt(i));
+                    else if (list2.Count() < n)
+                        listOfDifference.Add(list1.ElementAt(i));
+                    else
+                        listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
+                }
+            }
+            return listOfDifference;
+        }
+        public static List<double> DifferenceBetweenPairsOfMeasurements(this IEnumerable<double> list1, double number)
+        {
+
+            List<double> listOfDifference = new List<double>();
+            int n = list1.Count();
+
+            for (int i = 0; i < n; ++i)
+            {
+                listOfDifference.Add(list1.ElementAt(i) - number);
+            }
+            return listOfDifference;
+        }
+
     }
 }

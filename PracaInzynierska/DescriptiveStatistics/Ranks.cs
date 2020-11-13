@@ -81,7 +81,6 @@ namespace PracaInzynierska.DescriptiveStatistics
                 {
                     sumNegative += dictOfPairs[Math.Abs(item)];
                 }
-                Console.WriteLine(dictOfPairs[Math.Abs(item)]);
             }
 
             double sum = 0;
@@ -109,9 +108,11 @@ namespace PracaInzynierska.DescriptiveStatistics
             public double CorrectionForTiedRanks;
         }
 
-        public static RanksForKruskalaWallisa CalculateRankForKruskalaWallisa(this IEnumerable<double> list)
+        public static RanksForKruskalaWallisa CalculateRankForKruskalaWallisa(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
-            list = list.Where(x => x != 0);
+
+            List<double> list= list1.Concat(list2).ToList();
+
             int n = list.Count();
             list = list.OrderBy(x => Math.Abs(x)).ToList();
 
@@ -121,8 +122,6 @@ namespace PracaInzynierska.DescriptiveStatistics
             double numberTiedRanks = list.GroupBy(x => Math.Abs(x)).Where(x => x.Count() > 1).Sum(x => x.Count());
 
             Dictionary<double, double> tiedPairs = list.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)x.Count());
-
-
             double m = 0;
             double nSum = 0;
             for (int i = 0; i < n - 1; i++)
@@ -151,34 +150,40 @@ namespace PracaInzynierska.DescriptiveStatistics
                     dictOfPairs[Math.Abs(listOfRanks.ElementAt(n - 1))] = ((nSum + n) / (m + 1));
                 }
             }
+            double t1 = 0;
+            double t2 = 0;
+            foreach (double item in list1)
+            {
+                t1 += dictOfPairs[Math.Abs(item)];
+            }
+            foreach (double item in list2)
+            {
+                t2 += dictOfPairs[Math.Abs(item)];
+            }
+            Console.WriteLine("t1:" + t1);
 
+            Console.WriteLine("t2:" + t2);
+
+            double nj = list1.Count();
+            double sumRj = (t1 * t1) / nj + (t2 * t2) / nj;
             double sumN=0;
-            foreach (double item in list)
+            for (int i = 1; i < nj; i++)
             {
-                sumN += item;
+                sumN += (double)i;
             }
-            double sumR = 0;
-            double sumKW=0;
-            foreach (double item in listOfRanks)
-            {
-                sumR += (dictOfPairs[Math.Abs(item)]* dictOfPairs[Math.Abs(item)]);
-                sumKW += (sumR) / n;
-            }
-
             double sum = 0;
-
             foreach (var i in tiedPairs)
             {
                 sum += (i.Value * i.Value * i.Value) - i.Value;
             }
-            double correctionForTied =1- (sum / (sumN*sumN*sumN-sumN));
+            double correctionForTied =1.0- (sum / (sumN*sumN*sumN-sumN));
 
             return new RanksForKruskalaWallisa
             {
                 NumberOfRanks = n,
-                sumValue = sumKW,
+                sumValue = sumRj,
                 nValue = sumN,
-                CorrectionForTiedRanks = correctionForTied
+                CorrectionForTiedRanks =correctionForTied
             };
         }
     }

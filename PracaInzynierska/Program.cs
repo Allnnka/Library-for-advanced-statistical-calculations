@@ -33,7 +33,7 @@ namespace PracaInzynierska
 
             // double t1t3 = Statystyki.CalculateStudentsTTest(tablicaDouble1, tablicaDouble3).NormalDistributionPValue;
             //Console.WriteLine("df" + t1t3);
-            double w12 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble1,tablicaDouble3).PValue;
+            double w12 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2,tablicaDouble4).TestValue;
             Console.WriteLine("WWW " + w12);
             //Console.WriteLine("Max " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfPositiveRanks);
             //Console.WriteLine("Min " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfNegativeRanks);

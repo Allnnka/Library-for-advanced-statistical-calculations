@@ -2,6 +2,7 @@
 using PracaInzynierska.Distribution;
 using System;
 using System.Collections.Generic;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -295,44 +296,7 @@ namespace PracaInzynierska.Statystyka
             public double DegreesOfFreedom;
             public double PValueForStudentTest;
         }
-        public static List<double> DifferenceBetweenPairsOfMeasurements(this IEnumerable<double> list1, IEnumerable<double> list2)
-        {
-            
-            List<double> listOfDifference = new List<double>();
-            int n = Math.Max(list1.Count(),list2.Count());
-            if (list1.Count() == list2.Count())
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
-                }
-            }
-            else
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    if(list1.Count()<n)
-                        listOfDifference.Add(list2.ElementAt(i));
-                    else if (list2.Count()<n)
-                        listOfDifference.Add(list1.ElementAt(i));
-                    else
-                        listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
-                }
-            }
-            return listOfDifference;
-        }
-        public static List<double> DifferenceBetweenPairsOfMeasurements(this IEnumerable<double> list1, double number)
-        {
-            
-            List<double> listOfDifference = new List<double>();
-            int n = list1.Count();
-
-            for (int i = 0; i < n; ++i)
-            {
-                listOfDifference.Add(list1.ElementAt(i) - number);
-            }
-            return listOfDifference;
-        }
+        
         public static StudentsTTest CalculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean=0)
         {
             int n = list1.Count();
@@ -382,7 +346,7 @@ namespace PracaInzynierska.Statystyka
             }
             else {
                 if (n1 != n2) throw new ArgumentException("nie wszystkie argumenty mają tę samą długość");
-                List<double> listOfPairs = DifferenceBetweenPairsOfMeasurements(list1, list2);
+                List<double> listOfPairs = Util.DifferenceBetweenPairsOfMeasurements(list1, list2);
                 double averageForPairs = CalculateMean(listOfPairs);
                 double standardDeviationForPairs = CalculateStandardDeviation(listOfPairs);
                 t = averageForPairs / standardDeviationForPairs * Math.Sqrt(listOfPairs.Count());
@@ -414,7 +378,7 @@ namespace PracaInzynierska.Statystyka
             int n = list.Count();
             Rank r;
             if (hypotheticalMedian != 0)
-                r = Ranks.CalculateRank(DifferenceBetweenPairsOfMeasurements(list, hypotheticalMedian));
+                r = Ranks.CalculateRank(Util.DifferenceBetweenPairsOfMeasurements(list, hypotheticalMedian));
             else
                 r = Ranks.CalculateRank(list);
 
@@ -442,7 +406,7 @@ namespace PracaInzynierska.Statystyka
             //if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
 
             int n = Math.Max(list1.Count(),list2.Count());
-            Rank r = Ranks.CalculateRank(DifferenceBetweenPairsOfMeasurements(list1, list2));
+            Rank r = Ranks.CalculateRank(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
 
             double w = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
             double nRanks = (double)r.NumberOfRanks;
@@ -710,16 +674,20 @@ namespace PracaInzynierska.Statystyka
         public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1,IEnumerable<double> list2)
         {
             if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
-            List<double> list = DifferenceBetweenPairsOfMeasurements(list1, list2);
+            int n = list1.Count();
+            RanksForKruskalaWallisa r = Ranks.CalculateRankForKruskalaWallisa(list1, list2);
 
-            RanksForKruskalaWallisa r = Ranks.CalculateRankForKruskalaWallisa(DifferenceBetweenPairsOfMeasurements(list1, list2));
+            double kwScore = (12.0 / (r.nValue * (r.nValue + 1.0))) * r.sumValue-3.0*(r.nValue+1.0);
+            //kwScore *= (1.0/r.CorrectionForTiedRanks);
+            Console.WriteLine("nValue:"+ r.nValue);
+            Console.WriteLine("sumValue:" + r.sumValue);
+            Console.WriteLine("Correction:" + r.CorrectionForTiedRanks);
 
-            double h = ((12 / (r.nValue * (r.nValue + 1)))*r.sumValue-3*(r.nValue+1));
-
+            double pVal = 0;// 1.0- ContinuousDistribution.chisquareCdf(kwScore, 1);
             return new Test
             {
-                TestValue = h,
-                PValue = 0
+                TestValue = kwScore,
+                PValue = Math.Round(pVal,5)
             };
         }
     }

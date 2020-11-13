@@ -358,9 +358,16 @@ namespace TestAnalizaWyników
         public void TestKruskalaWalisaTest()
         {
             double ch13 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble1,tablicaDouble3).TestValue;
+            double ch13PVal = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble1, tablicaDouble3).PValue;
 
+            double ch24 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).TestValue;
+            double ch24PVal = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
 
-            Assert.AreEqual(3, ch13);
+            //Assert.AreEqual(3, ch13);
+            //Assert.AreEqual(0.08326, ch13PVal);
+
+            Assert.AreEqual(1.8, ch24);
+            Assert.AreEqual(0.1797, ch24PVal);
         }
     }
 }

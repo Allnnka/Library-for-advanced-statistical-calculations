@@ -207,5 +207,96 @@ namespace PracaInzynierska.Distribution
             }
             return mu + sigma * val;
         }
+
+
+        public static double LogGamma(double Z)
+        {
+            double S = 1.0 + 76.18009173 / Z - 86.50532033 / (Z + 1.0) + 24.01409822 / (Z + 2.0) - 1.231739516 / (Z + 3.0) + 0.00120858003 / (Z + 4.0) - 0.00000536382 / (Z + 5.0);
+            double LG = (Z - 0.5) * Math.Log(Z + 4.5) - (Z + 4.5) + Math.Log(S * 2.50662827465);
+
+            return LG;
+        }
+        private static double gCf(double x, double A)
+        {
+            // Good for X>A+1
+            double A0 = 0;
+            double B0 = 1;
+            double A1 = 1;
+            double B1 = x;
+            double AOLD = 0;
+            double N = 0;
+            while (Math.Abs((A1 - AOLD) / A1) > .00001)
+            {
+                AOLD = A1;
+                N = N + 1;
+                A0 = A1 + (N - A) * A0;
+                B0 = B1 + (N - A) * B0;
+                A1 = x * A0 + N * A1;
+                B1 = x * B0 + N * B1;
+                A0 = A0 / B1;
+                B0 = B0 / B1;
+                A1 = A1 / B1;
+                B1 = 1;
+            }
+            double Prob = Math.Exp(A * Math.Log(x) - x - LogGamma(A)) * A1;
+
+            return 1.0 - Prob;
+        }
+        private static double gSer(double x, double A)
+        {
+            // Good for X<A+1.
+            double T9 = 1 / A;
+            double G = T9;
+            double I = 1;
+            while (T9 > G * 0.00001)
+            {
+                T9 = T9 * x / (A + I);
+                G = G + T9;
+                ++I;
+            }
+            G = G * Math.Exp(A * Math.Log(x) - x - LogGamma(A));
+
+            return G;
+        }
+        public static double Gamma(double x, double a)
+        {
+            if (x < 0)
+            {
+                throw new ArgumentException("The x parameter must be positive.");
+            }
+
+            double GI;
+            if (a > 200)
+            {
+                double z = (x - a) / Math.Sqrt(a);
+                double y = Gauss(z);
+                double b1 = 2 / Math.Sqrt(a);
+                double phiz = 0.39894228 * Math.Exp(-z * z / 2);
+                double w = y - b1 * (z * z - 1) * phiz / 6;  //Edgeworth1
+                double b2 = 6 / a;
+                int zXor4 = ((int)z) ^ 4;
+                double u = 3 * b2 * (z * z - 3) + b1 * b1 * (zXor4 - 10 * z * z + 15);
+                GI = w - phiz * z * u / 72;        //Edgeworth2
+            }
+            else if (x < a + 1)
+            {
+                GI = gSer(x, a);
+            }
+            else
+            {
+                GI = gCf(x, a);
+            }
+
+            return GI;
+        }
+        public static double chisquareCdf(double x, int df)
+        {
+            if (df <= 0)
+            {
+                throw new ArgumentException("The degrees of freedom need to be positive.");
+            }
+
+            return Gamma(x / 2.0, df / 2.0);
+        }
     }
 }

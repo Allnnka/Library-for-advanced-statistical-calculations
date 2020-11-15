@@ -175,9 +175,7 @@ namespace PracaInzynierska.DescriptiveStatistics
             for (int i=0;i< sumValues.Count(); i++)
             {
                 sumRij += (sumValues.ElementAt(i) * sumValues.ElementAt(i)) / lengthValues.ElementAt(i);
-                Console.WriteLine("Sum value list el: "+i+"value"+ sumValues.ElementAt(i));
             }
-            Console.WriteLine("sumRij: " + sumRij);
             //HashSet<double> nlevels = new HashSet<double>();
             //foreach (double item in list1)
             //{

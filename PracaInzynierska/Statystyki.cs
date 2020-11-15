@@ -2,13 +2,7 @@
 using PracaInzynierska.Distribution;
 using System;
 using System.Collections.Generic;
-using System.IO.IsolatedStorage;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using static PracaInzynierska.DescriptiveStatistics.Ranks;
 
 namespace PracaInzynierska.Statystyka
@@ -37,41 +31,41 @@ namespace PracaInzynierska.Statystyka
             return list.Max() - list.Min(); //nieoptymalne, wystarczyłaby jedna pętla zamiast dwóch     
         }
 
-        public enum StandardDeviationType { Próbki, Populacji };
+        public enum StandardDeviationType { Samples, Population };
 
-        public static double CalculateStandardDeviation(this IEnumerable<double> list, StandardDeviationType typ = StandardDeviationType.Próbki)
+        public static double CalculateStandardDeviation(this IEnumerable<double> list, StandardDeviationType typ = StandardDeviationType.Samples)
         {
-            double średnia = list.Average();
-            double odchylenie = 0;
-            foreach (double wartość in list)
+            double mean = list.Average();
+            double deviation = 0;
+            foreach (double item in list)
             {
-                odchylenie += (wartość - średnia) * (wartość - średnia);
+                deviation += (item - mean) * (item - mean);
             }
             switch(typ)
             {
-                case StandardDeviationType.Populacji:
+                case StandardDeviationType.Population:
                     if (list.Count() == 0) throw new Exception("Błąd obliczania odchylenia standardowego. Kolekcja jest pusta");
-                    odchylenie /= list.Count();
+                    deviation /= list.Count();
                     break;
-                case StandardDeviationType.Próbki:
+                case StandardDeviationType.Samples:
                     if (list.Count() <= 1) throw new Exception("Błąd obliczania odchylenia standardowego. Niewystarczająca liczebność populacji    ");
-                    odchylenie /= list.Count() - 1;
+                    deviation /= list.Count() - 1;
                     break;
                 default:
                     throw new Exception("Nierozpoznany typ odchylenia standardowego");
-            }            
-            odchylenie = Math.Sqrt(odchylenie);
-            return odchylenie;
+            }
+            deviation = Math.Sqrt(deviation);
+            return deviation;
         }
 
-        public static double CalculateStandardDeviation(this IEnumerable<float> list, StandardDeviationType typ = StandardDeviationType.Populacji)
+        public static double CalculateStandardDeviation(this IEnumerable<float> list, StandardDeviationType typ = StandardDeviationType.Population)
         {
             List<double> kopia = new List<double>();
             foreach (float wartość in list) kopia.Add((double)wartość);
             return CalculateStandardDeviation(kopia, typ);
         }
 
-        public static double CalculateStandardDeviation(this IEnumerable<int> list, StandardDeviationType typ = StandardDeviationType.Populacji)
+        public static double CalculateStandardDeviation(this IEnumerable<int> list, StandardDeviationType typ = StandardDeviationType.Population)
         {
             List<double> kopia = new List<double>();
             foreach (int wartość in list) kopia.Add((double)wartość);
@@ -79,45 +73,45 @@ namespace PracaInzynierska.Statystyka
         }
 
         //https://en.wikipedia.org/wiki/Quartile, Method2
-        public static void ObliczKwartyle(this IEnumerable<double> list, out double q1, out double q2, out double q3)
+        public static void CalculateQuartile(this IEnumerable<double> list, out double q1, out double q2, out double q3)
         {
             List<double> _list = list.ToList();
             _list.Sort();
 
-            List<double> dolnaPołowa = new List<double>();
-            List<double> górnaPołowa = new List<double>();
+            List<double> lowerHalf = new List<double>();
+            List<double> upperHalf = new List<double>();
 
             if (_list.Count % 2 != 0)
             {
                 q2 = _list[_list.Count / 2];
-                for (int i = 0; i < _list.Count / 2; ++i) dolnaPołowa.Add(_list[i]);
-                for (int i = _list.Count / 2; i < _list.Count; ++i) górnaPołowa.Add(_list[i]);
+                for (int i = 0; i < _list.Count / 2; ++i) lowerHalf.Add(_list[i]);
+                for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
             else
             {
                 q2 = (_list[_list.Count / 2 - 1] + _list[_list.Count / 2]) / 2.0;
-                for (int i = 0; i < _list.Count / 2 - 1; ++i) dolnaPołowa.Add(_list[i]);
-                for (int i = _list.Count / 2; i < _list.Count; ++i) górnaPołowa.Add(_list[i]);
+                for (int i = 0; i < _list.Count / 2 - 1; ++i) lowerHalf.Add(_list[i]);
+                for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
 
-            q1 = _obliczMedianę(dolnaPołowa);
-            q3 = _obliczMedianę(górnaPołowa);
+            q1 = _calculateMedian(lowerHalf);
+            q3 = _calculateMedian(upperHalf);
         }
 
-        public static double ObliczRozstępKwartalny(this IEnumerable<double> list)
+        public static double CalculateQuarterRange(this IEnumerable<double> list)
         {
             if (list.Count() < 3) throw new Exception("Danych jest zbyt mało, żeby obliczyć kwartyle (n=" + list.Count() + ")");
             double q1,q2,q3;
-            ObliczKwartyle(list, out q1, out q2, out q3);
+            CalculateQuartile(list, out q1, out q2, out q3);
             return q3 - q1;
         }
 
-        public static double ObliczOdchylenieĆwiartkowe(this IEnumerable<double> list)
+        public static double CalculateQuarterlyVariance(this IEnumerable<double> list)
         {
-            return ObliczRozstępKwartalny(list) / 2;
+            return CalculateQuarterRange(list) / 2;
         }
 
-        private static double _obliczMedianę(List<double> list)
+        private static double _calculateMedian(List<double> list)
         {
             if (list.Count == 0) throw new Exception("lista nie zawiera elementów");
 
@@ -129,54 +123,55 @@ namespace PracaInzynierska.Statystyka
                 return (list[list.Count / 2 - 1] + list[list.Count / 2]) / 2.0;
         }
 
-        public static double ObliczMedianę(this IEnumerable<double> list)
+        public static double CalculateMedian(this IEnumerable<double> list)
         {
-            List<double> kopia = new List<double>();
-            foreach (double wartość in list) kopia.Add(wartość);
-            return _obliczMedianę(kopia);
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add(item);
+            return _calculateMedian(copy);
         }
 
-        public static double ObliczMedianę(this IEnumerable<int> list)
+        public static double CalculateMedian(this IEnumerable<int> list)
         {
-            List<double> kopia = new List<double>();
-            foreach (int wartość in list) kopia.Add((double)wartość);
-            return _obliczMedianę(kopia);
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return _calculateMedian(copy);
         }
 
-        public static double ObliczMedianę(this IEnumerable<long> list)
+        public static double CalculateMedian(this IEnumerable<long> list)
         {
-            List<double> kopia = new List<double>();
-            foreach (long wartość in list) kopia.Add((double)wartość);
-            return _obliczMedianę(kopia);
+            List<double> copy = new List<double>();
+            foreach (long item in list) copy.Add((double)item);
+            return _calculateMedian(copy);
         }
 
-        public static double ObliczSkośność(this IEnumerable<int> list)
+        public static double CalculateSkewness(this IEnumerable<int> list)
         {
-            return (CalculateMean(list) - ObliczMedianę(list)) / CalculateStandardDeviation(list);
+            return (CalculateMean(list) - CalculateMedian(list)) / CalculateStandardDeviation(list);
         }
 
-        public static double ObliczSkośność(this IEnumerable<double> list)
+        public static double CalculateSkewness(this IEnumerable<double> list)
         {
-            return (CalculateMean(list) - ObliczMedianę(list)) / CalculateStandardDeviation(list);
+            return (CalculateMean(list) - CalculateMedian(list)) / CalculateStandardDeviation(list);
         }
 
 
 
         //TODO: histogram, dominanta/moda/modalna, kurtoza
-        public static List<double> _obliczModę(List<double> list)
+        public static List<double> _calculateMode(List<double> list)
         {
             if (list.Count == 0) throw new Exception("Lista nie zawiera elementów");
 
             List<double> currentMax = new List<double>();
 
-            Dictionary<double, int> słownikIlośćiWystepowańElementów = list.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+            //Słownik IlośćiWystepowańElementów
+            Dictionary<double, int> dictNumberOfOccurrencesOfElements = list.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
 
-            if (!((słownikIlośćiWystepowańElementów.Values.GroupBy(x => x).Where(x => x.Count() >= 1))
+            if (!((dictNumberOfOccurrencesOfElements.Values.GroupBy(x => x).Where(x => x.Count() >= 1))
                 .Count() > 1)) throw new Exception("Dominanta w danym zbiorze nie występuję");
             
             int occurences = 0;
 
-            foreach (KeyValuePair<double,int> x in słownikIlośćiWystepowańElementów)
+            foreach (KeyValuePair<double,int> x in dictNumberOfOccurrencesOfElements)
             {
                 if (occurences < x.Value)                                                                        
                 {
@@ -193,43 +188,34 @@ namespace PracaInzynierska.Statystyka
         }
 
 
-        public static List<double> ObliczModę(this IEnumerable<double> list)
+        public static List<double> CalculateMode(this IEnumerable<double> list)
         {
-            List<double> kopia = new List<double>();
-            foreach (int wartość in list) kopia.Add(wartość);
-            return _obliczModę(kopia);
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add(item);
+            return _calculateMode(copy);
 
         }
-        public static List<double> ObliczModę(this IEnumerable<long> list)
+        public static List<double> CalculateMode(this IEnumerable<long> list)
         {
-            List<double> kopia = new List<double>();
-            foreach (int wartość in list) kopia.Add((double)wartość);
-            return _obliczModę(kopia);
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return _calculateMode(copy);
 
         }
-        public static List<double> ObliczModę(this IEnumerable<int> list)
+        public static List<double> CalculateMode(this IEnumerable<int> list)
         {
-            List<double> kopia = new List<double>();
-            foreach (int wartość in list) kopia.Add((double)wartość);
-            return _obliczModę(kopia);
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return _calculateMode(copy);
         }
 
-        public static double ObliczKurtozę(this IEnumerable<double> list)
+        public static double CalculateKurtosis(this IEnumerable<double> list)
         {
             int n = list.Count();
-            double średnia = CalculateMean(list);
+            double mean = CalculateMean(list);
 
-            return (n * (n + 1) * list.Sum(x => Math.Pow((x - średnia),4))-3*list.Sum(x=>((x-średnia)* (x - średnia))) * list.Sum(x => ((x - średnia) * (x - średnia)))*(n-1))/
+            return (n * (n + 1) * list.Sum(x => Math.Pow((x - mean),4))-3*list.Sum(x=>((x- mean) * (x - mean))) * list.Sum(x => ((x - mean) * (x - mean)))*(n-1))/
                 ((n-1)*(n-2)*(n-3)*Math.Pow(CalculateStandardDeviation(list),4));
-        }
-        public static double OblićWartośćOczekiwaną(this IEnumerable<double> list)
-        {
-            double wartośćOczekiwana = 0;
-            foreach(double wartość in list)
-            {
-                wartośćOczekiwana += wartość * (1 / list.Count());
-            }
-            return wartośćOczekiwana;
         }
         public struct LinearCorrelation
         {
@@ -290,14 +276,8 @@ namespace PracaInzynierska.Statystyka
                 PValueForStudentTDistribution= pForT
             };
         }
-        public struct StudentsTTest
-        {
-            public double TStudentTest;
-            public double DegreesOfFreedom;
-            public double PValueForStudentTest;
-        }
         
-        public static StudentsTTest CalculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean=0)
+        public static Test CalculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean=0)
         {
             int n = list1.Count();
             double average = CalculateMean(list1);
@@ -306,14 +286,14 @@ namespace PracaInzynierska.Statystyka
             double tforOneSample = ((average - hypotheticalMean) / standardDeviation) * Math.Sqrt(n);
             int df = 1;
             double p = ContinuousDistribution.Student(tforOneSample,n-1);
-            return new StudentsTTest()
+            return new Test()
             {
-                TStudentTest = Math.Round(tforOneSample, 4),
+                TestValue = Math.Round(tforOneSample, 4),
                 DegreesOfFreedom = df,
-                PValueForStudentTest = Math.Round(p,5)
+                PValue = Math.Round(p,5)
             };
         }
-        public static StudentsTTest CalculateStudentsTTest(this IEnumerable<double> list1,IEnumerable<double> list2,bool pairs=false)
+        public static Test CalculateStudentsTTest(this IEnumerable<double> list1,IEnumerable<double> list2,bool pairs=false)
         {
             int n1 = list1.Count();
             int n2 = list2.Count();
@@ -354,11 +334,11 @@ namespace PracaInzynierska.Statystyka
             }
 
             double p = ContinuousDistribution.Student(t, df);
-            return new StudentsTTest()
+            return new Test()
             {
-                TStudentTest = Math.Round(t,4),
+                TestValue = Math.Round(t,4),
                 DegreesOfFreedom= Math.Round(df,4),
-                PValueForStudentTest= Math.Round(p, 4)
+                PValue= Math.Round(p, 4)
             };
         }
      
@@ -429,7 +409,7 @@ namespace PracaInzynierska.Statystyka
         {
             public double TestValue;
             public double PValue;
-            public int Df;
+            public double DegreesOfFreedom;
         }
         public static Test CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<double> list)
         {
@@ -671,7 +651,7 @@ namespace PracaInzynierska.Statystyka
         }
 
 
-
+        //https://stats.stackexchange.com/questions/381873/meaning-of-chi-squared-in-r-kruskal-wallis-test
         public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1,IEnumerable<double> list2)
         {
             if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
@@ -679,17 +659,15 @@ namespace PracaInzynierska.Statystyka
             RanksForKruskalaWallisa r = Ranks.CalculateRankForKruskalaWallisa(list1, list2);
 
             double kwScore = ((12.0 * r.sumValue) / (r.nValue * (r.nValue + 1.0)) - 3.0 * (r.nValue + 1.0));
-            Console.WriteLine("SumValue: " + r.sumValue);
             kwScore =kwScore/r.CorrectionForTiedRanks;
             kwScore =Math.Round(kwScore,1);
             int df = r.NLevelsList2 - 1;
             double pVal = 1.0- ContinuousDistribution.chisquareCdf(kwScore,df );
-            Console.WriteLine("CorrectionForTiesRanks: " +r.CorrectionForTiedRanks);
             return new Test
             {
                 TestValue = kwScore,
                 PValue = Math.Round(pVal,4),
-                Df=df
+                DegreesOfFreedom=df
             };
         }
     }

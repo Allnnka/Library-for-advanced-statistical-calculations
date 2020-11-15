@@ -359,22 +359,35 @@ namespace TestAnalizaWyników
         {
             double ch13 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble1,tablicaDouble3).TestValue;
             double ch13PVal = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble1, tablicaDouble3).PValue;
+            double ch13Df = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble1, tablicaDouble3).Df;
 
             double ch31 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble3, tablicaDouble1).TestValue;
             double ch31PVal = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble3, tablicaDouble1).PValue;
-
+            double ch31Df = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble3, tablicaDouble1).Df;
 
             double ch24 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).TestValue;
             double ch24PVal = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
+            double ch24Df = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).Df;
+
+            double ch42 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble4, tablicaDouble2).TestValue;
+            double ch42PVal = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble4, tablicaDouble2).PValue;
+            double ch42Df = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble4, tablicaDouble2).Df;
 
             Assert.AreEqual(3, ch13);
             Assert.AreEqual(0.0833, ch13PVal);
+            Assert.AreEqual(1, ch13Df);
 
             Assert.AreEqual(4, ch31);
             Assert.AreEqual(0.406, ch31PVal);
+            Assert.AreEqual(4, ch31Df);
 
             Assert.AreEqual(1.8, ch24);
             Assert.AreEqual(0.1797, ch24PVal);
+            Assert.AreEqual(1, ch24Df);
+
+            Assert.AreEqual(3, ch42);
+            Assert.AreEqual(0.3916, ch42PVal);
+            Assert.AreEqual(3, ch42Df);
         }
     }
 }

@@ -102,7 +102,7 @@ namespace PracaInzynierska.DescriptiveStatistics
 
         public struct RanksForKruskalaWallisa
         {
-            public int NumberOfRanks;
+            public int NLevelsList2;
             public double sumValue;
             public double nValue;
             public double CorrectionForTiedRanks;
@@ -110,18 +110,17 @@ namespace PracaInzynierska.DescriptiveStatistics
 
         public static RanksForKruskalaWallisa CalculateRankForKruskalaWallisa(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
+            List<double> factorList = list2.Distinct().ToList();
 
             List<double> list= list1.Concat(list2).ToList();
 
-            int n = list.Count();
-            list = list.OrderBy(x => Math.Abs(x)).ToList();
+            int n = list1.Count();
+            list1 = list1.OrderBy(x => Math.Abs(x)).ToList();
 
-            Dictionary<double, double> dictOfPairs = list.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)0);
-            List<double> listOfRanks = list.ToList();
-            int ranksTabN = list.Select(x => Math.Abs(x)).Distinct().Count();
-            double numberTiedRanks = list.GroupBy(x => Math.Abs(x)).Where(x => x.Count() > 1).Sum(x => x.Count());
+            Dictionary<double, double> dictOfPairs = list1.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)0);
+            List<double> listOfRanks = list1.ToList();
 
-            Dictionary<double, double> tiedPairs = list.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)x.Count());
+            Dictionary<double, double> tiedPairs = list1.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)x.Count());
             double m = 0;
             double nSum = 0;
             for (int i = 0; i < n - 1; i++)
@@ -150,39 +149,55 @@ namespace PracaInzynierska.DescriptiveStatistics
                     dictOfPairs[Math.Abs(listOfRanks.ElementAt(n - 1))] = ((nSum + n) / (m + 1));
                 }
             }
-            double t1 = 0;
-            double t2 = 0;
-            foreach (double item in list1)
-            {
-                t1 += dictOfPairs[Math.Abs(item)];
-            }
-            foreach (double item in list2)
-            {
-                t2 += dictOfPairs[Math.Abs(item)];
-            }
-            Console.WriteLine("t1:" + t1);
+            double sumValue=0;
+            double lengthValue = 0;
 
-            Console.WriteLine("t2:" + t2);
+            List<double> sumValues = new List<double>();
+            List<double> lengthValues = new List<double>();
 
-            double nj = list1.Count();
-            double sumRj = (t1 * t1) / nj + (t2 * t2) / nj;
-            double sumN=0;
-            for (int i = 1; i < nj; i++)
+            foreach (double item in factorList)
             {
-                sumN += (double)i;
+                for(int i = 0; i < n; i++)
+                {
+                    if (list2.ElementAt(i) == item)
+                    {
+                        sumValue += dictOfPairs[Math.Abs(listOfRanks.ElementAt(i))];
+                        lengthValue++;
+                    }
+                }
+                sumValues.Add(sumValue);
+                lengthValues.Add(lengthValue);
+                sumValue = 0;
+                lengthValue = 0;
             }
+
+            double sumRij = 0;
+            for (int i=0;i< sumValues.Count(); i++)
+            {
+                sumRij += (sumValues.ElementAt(i) * sumValues.ElementAt(i)) / lengthValues.ElementAt(i);
+                Console.WriteLine("Sum value list el: "+i+"value"+ sumValues.ElementAt(i));
+            }
+            Console.WriteLine("sumRij: " + sumRij);
+            //HashSet<double> nlevels = new HashSet<double>();
+            //foreach (double item in list1)
+            //{
+            //    nlevels.Add(dictOfPairs[Math.Abs(item)]);
+            //}
+
             double sum = 0;
             foreach (var i in tiedPairs)
             {
-                sum += (i.Value * i.Value * i.Value) - i.Value;
+                sum += ((i.Value * i.Value * i.Value) - i.Value);
             }
-            double correctionForTied =1.0- (sum / (sumN*sumN*sumN-sumN));
+
+            // double correctionForTied =1.0- (sum / (sumN*sumN*sumN-sumN));
+            double correctionForTied = 1.0-(sum / (n * n * n - n));
 
             return new RanksForKruskalaWallisa
             {
-                NumberOfRanks = n,
-                sumValue = sumRj,
-                nValue = sumN,
+                NLevelsList2 = factorList.Count(),
+                sumValue = sumRij,
+                nValue = n,  
                 CorrectionForTiedRanks =correctionForTied
             };
         }

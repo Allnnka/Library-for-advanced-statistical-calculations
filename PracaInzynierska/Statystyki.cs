@@ -674,20 +674,19 @@ namespace PracaInzynierska.Statystyka
         public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1,IEnumerable<double> list2)
         {
             if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
-            int n = list1.Count();
+
             RanksForKruskalaWallisa r = Ranks.CalculateRankForKruskalaWallisa(list1, list2);
 
-            double kwScore = (12.0 / (r.nValue * (r.nValue + 1.0))) * r.sumValue-3.0*(r.nValue+1.0);
-            //kwScore *= (1.0/r.CorrectionForTiedRanks);
-            Console.WriteLine("nValue:"+ r.nValue);
-            Console.WriteLine("sumValue:" + r.sumValue);
-            Console.WriteLine("Correction:" + r.CorrectionForTiedRanks);
-
-            double pVal = 0;// 1.0- ContinuousDistribution.chisquareCdf(kwScore, 1);
+            double kwScore = ((12.0 * r.sumValue) / (r.nValue * (r.nValue + 1.0)) - 3.0 * (r.nValue + 1.0));
+            Console.WriteLine("SumValue: " + r.sumValue);
+            kwScore =kwScore/r.CorrectionForTiedRanks;
+            kwScore =Math.Round(kwScore,1);
+            double pVal = 1.0- ContinuousDistribution.chisquareCdf(kwScore, r.NLevelsList2-1);
+            Console.WriteLine("CorrectionForTiesRanks: " +r.CorrectionForTiedRanks);
             return new Test
             {
                 TestValue = kwScore,
-                PValue = Math.Round(pVal,5)
+                PValue = Math.Round(pVal,4)
             };
         }
     }

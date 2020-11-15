@@ -15,12 +15,13 @@ namespace PracaInzynierska
            
             double[] tab3 = { 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7 };
             double[] t1 = { 1, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            double[] t3 = { 3,7,6,4,2,6,9,6,4,1,2,9,14 };
             double[] t2 = { 0.269, 0.357, 0.2, 0.221, 0.275, 0.277, 0.253, 0.127, 0.246 };
 
             double[] tablicaDouble1 = { 1, 2, 3, 4, 5 };
             double[] tablicaDouble2 = { 1, 2, 3, 4 };
             double[] tablicaDouble3 = { 1, 1, 1, 2, 2 };
-            double[] tablicaDouble4 = { 1,1,1,2 };
+            double[] tablicaDouble4 = { 1,1,1,2};
 
 
             //Console.WriteLine("W: " + Statystyki.CalculateWilcoxonTest(tablicaDouble2, tablicaDouble4).WValue);
@@ -33,8 +34,11 @@ namespace PracaInzynierska
 
             // double t1t3 = Statystyki.CalculateStudentsTTest(tablicaDouble1, tablicaDouble3).NormalDistributionPValue;
             //Console.WriteLine("df" + t1t3);
-            double w12 = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2,tablicaDouble4).TestValue;
-            Console.WriteLine("WWW " + w12);
+            double test = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble3, tablicaDouble1).TestValue;
+           // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
+
+            Console.WriteLine("test " + test);
+            //Console.WriteLine("pval " + pval);
             //Console.WriteLine("Max " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfPositiveRanks);
             //Console.WriteLine("Min " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfNegativeRanks);
         }

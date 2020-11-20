@@ -216,7 +216,9 @@ namespace PracaInzynierska.Distribution
 
             return LG;
         }
-        private static double gCf(double x, double A)
+
+        //Internal function used by gammaCdf
+        private static double GCdf(double x, double A)
         {
             // Good for X>A+1
             double A0 = 0;
@@ -284,7 +286,7 @@ namespace PracaInzynierska.Distribution
             }
             else
             {
-                GI = gCf(x, a);
+                GI = GCdf(x, a);
             }
 
             return GI;
@@ -298,5 +300,77 @@ namespace PracaInzynierska.Distribution
 
             return Gamma(x / 2.0, df / 2.0);
         }
+
+        //Internal function used by StudentCdf
+        public static double Betinc(double x, double A, double B)
+        {
+            double A0 = 0.0;
+            double B0 = 1.0;
+            double A1 = 1.0;
+            double B1 = 1.0;
+            double M9 = 0.0;
+            double A2 = 0.0;
+            while (Math.Abs((A1 - A2) / A1) > 0.00001)
+            {
+                A2 = A1;
+                double C9 = -(A + M9) * (A + B + M9) * x / (A + 2.0 * M9) / (A + 2.0 * M9 + 1.0);
+                A0 = A1 + C9 * A0;
+                B0 = B1 + C9 * B0;
+                M9 = M9 + 1;
+                C9 = M9 * (B - M9) * x / (A + 2.0 * M9 - 1.0) / (A + 2.0 * M9);
+                A1 = A0 + C9 * A1;
+                B1 = B0 + C9 * B1;
+                A0 = A0 / B1;
+                B0 = B0 / B1;
+                A1 = A1 / B1;
+                B1 = 1.0;
+            }
+            return A1 / A;
+        }
+        public static double Beta(double x, double a, double b)
+        {
+            if (x < 0 || a <= 0 || b <= 0)
+            {
+                throw new ArgumentException("All the parameters must be positive.");
+            }
+
+            double beta = 0.0;
+
+            if (x == 0)
+            {
+                return beta;
+            }
+            else if (x >= 1)
+            {
+                beta = 1.0;
+                return beta;
+            }
+
+            double S = a + b;
+
+            double BT = Math.Exp(LogGamma(S) - LogGamma(b) - LogGamma(a) + a * Math.Log(x) + b * Math.Log(1 - x));
+            if (x < (a + 1.0) / (S + 2.0))
+            {
+                beta = BT * Betinc(x, a, b);
+            }
+            else
+            {
+                beta = 1.0 - BT * Betinc(1.0 - x, b, a);
+            }
+
+            return beta;
+        }
+
+        //Calculates the probability from 0 to X under F Distribution
+        public static double FCdf(double x, int d1, int d2)
+        {
+            if (x < 0 || d1 <= 0 || d2 <= 0)
+                throw new ArgumentException("All the parameters must be positive.");
+            double Z = (d1*x)/(d1*x+d2);
+            double FCdf = Beta(Z, d1 / 2.0, d2 / 2.0);
+
+            return 1.0-FCdf;
+        }
+
     }
 }

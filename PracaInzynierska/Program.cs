@@ -34,7 +34,7 @@ namespace PracaInzynierska
 
             // double t1t3 = Statystyki.CalculateStudentsTTest(tablicaDouble1, tablicaDouble3).NormalDistributionPValue;
             //Console.WriteLine("df" + t1t3);
-            double test = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble3, tablicaDouble1).TestValue;
+            double test = Statystyki.CalculateFTestToCompareTwoVariances(tablicaDouble3, tablicaDouble1).PValue;
            // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
 
             Console.WriteLine("test " + test);

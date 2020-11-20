@@ -389,5 +389,40 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.3916, ch42PVal);
             Assert.AreEqual(3, ch42Df);
         }
+
+        [TestMethod]
+        public void FTestToCompareTwoVariances()
+        {
+            //var.test(d1,d2)
+            double f12 = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble2).RatioOfVariances;
+            double f12numDf = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble2).NumDf;
+            double f12DenomDf = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble2).DenomDf;
+            double f12pVal = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble2).PValue;
+
+            Assert.AreEqual(f12, 1.5);
+            Assert.AreEqual(f12numDf, 4);
+            Assert.AreEqual(f12DenomDf, 3);
+            Assert.AreEqual(f12pVal, 0.7698);
+
+            double f13 = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble3).RatioOfVariances;
+            double f13numDf = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble3).NumDf;
+            double f13DenomDf = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble3).DenomDf;
+            double f13pVal = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble3).PValue;
+
+            Assert.AreEqual(f13, 8.3333);
+            Assert.AreEqual(f13numDf, 4);
+            Assert.AreEqual(f13DenomDf, 4);
+            Assert.AreEqual(f13pVal, 0.06396);
+
+            double f24 = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, tableDouble4).RatioOfVariances;
+            double f24numDf = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, tableDouble4).NumDf;
+            double f24DenomDf = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, tableDouble4).DenomDf;
+            double f24pVal = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, tableDouble4).PValue;
+
+            Assert.AreEqual(f24, 6.6667);
+            Assert.AreEqual(f24numDf, 3);
+            Assert.AreEqual(f24DenomDf, 3);
+            Assert.AreEqual(f24pVal, 0.15353);
+        }
     }
 }

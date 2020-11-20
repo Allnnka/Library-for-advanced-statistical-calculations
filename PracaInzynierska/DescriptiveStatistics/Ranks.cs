@@ -176,11 +176,6 @@ namespace PracaInzynierska.DescriptiveStatistics
             {
                 sumRij += (sumValues.ElementAt(i) * sumValues.ElementAt(i)) / lengthValues.ElementAt(i);
             }
-            //HashSet<double> nlevels = new HashSet<double>();
-            //foreach (double item in list1)
-            //{
-            //    nlevels.Add(dictOfPairs[Math.Abs(item)]);
-            //}
 
             double sum = 0;
             foreach (var i in tiedPairs)
@@ -188,7 +183,6 @@ namespace PracaInzynierska.DescriptiveStatistics
                 sum += ((i.Value * i.Value * i.Value) - i.Value);
             }
 
-            // double correctionForTied =1.0- (sum / (sumN*sumN*sumN-sumN));
             double correctionForTied = 1.0-(sum / (n * n * n - n));
 
             return new RanksForKruskalaWallisa

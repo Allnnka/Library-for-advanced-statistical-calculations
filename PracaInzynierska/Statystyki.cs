@@ -26,6 +26,19 @@ namespace PracaInzynierska.Statystyka
             return list.Select(l => (double)l).CalculateMean();
         }
 
+        public static double CalculateSampleMeans(this IEnumerable<double> list)
+        {
+            double sampleMeans = 0;
+            double mean = list.CalculateMean();
+            int n = list.Count();
+            foreach (double item in list)
+            {
+                sampleMeans += (item - mean) * (item - mean);
+            }
+            sampleMeans = sampleMeans / ((double)n - 1);
+            return sampleMeans;
+        }
+
         public static double CalculateRange(this IEnumerable<double> list) //range
         { 
             return list.Max() - list.Min(); //nieoptymalne, wystarczyłaby jedna pętla zamiast dwóch     
@@ -649,8 +662,6 @@ namespace PracaInzynierska.Statystyka
                 PValue =pValue
             };
         }
-
-
         //https://stats.stackexchange.com/questions/381873/meaning-of-chi-squared-in-r-kruskal-wallis-test
         public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1,IEnumerable<double> list2)
         {
@@ -668,6 +679,33 @@ namespace PracaInzynierska.Statystyka
                 TestValue = kwScore,
                 PValue = Math.Round(pVal,4),
                 DegreesOfFreedom=df
+            };
+        }
+
+
+        public struct FTest
+        {
+            public double RatioOfVariances;
+            public int NumDf;
+            public int DenomDf;
+            public double PValue;
+        }
+        //Use F test to compare two variances
+        public static FTest CalculateFTestToCompareTwoVariances(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            int n = list1.Count();
+            int m = list2.Count();
+
+            double f = CalculateSampleMeans(list1) / CalculateSampleMeans(list2);
+
+            double p =2* ContinuousDistribution.FCdf(f, n-1, m-1);
+            return new FTest
+            {
+                RatioOfVariances=Math.Round(f,4),
+                NumDf=n-1,
+                DenomDf=m-1,
+                PValue = Math.Round(p,5)
+                
             };
         }
     }

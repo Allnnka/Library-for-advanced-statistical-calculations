@@ -673,7 +673,7 @@ namespace PracaInzynierska.Statystyka
             kwScore =kwScore/r.CorrectionForTiedRanks;
             kwScore =Math.Round(kwScore,1);
             int df = r.NLevelsList2 - 1;
-            double pVal = 1.0- ContinuousDistribution.chisquareCdf(kwScore,df );
+            double pVal = 1.0- ContinuousDistribution.chisquareCdf(kwScore,df);
             return new Test
             {
                 TestValue = kwScore,
@@ -690,7 +690,9 @@ namespace PracaInzynierska.Statystyka
             public int DenomDf;
             public double PValue;
         }
+
         //Use F test to compare two variances
+        //
         public static FTest CalculateFTestToCompareTwoVariances(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             int n = list1.Count();
@@ -708,5 +710,81 @@ namespace PracaInzynierska.Statystyka
                 
             };
         }
+        //https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/8-chi-squared-tests
+
+        public static Test CalculateChiSquaredTest(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
+
+            List<double> p = new List<double>();
+            List<double> n= new List<double>();
+            List<double> E = new List<double>();
+
+            double sumA = 0;
+            double sumB = 0;
+            double sumN = 0;
+            
+
+            for (int i = 0; i < list1.Count(); i++)
+            {
+                n.Add(list1.ElementAt(i) + list2.ElementAt(i));
+                p.Add(list1.ElementAt(i)/n.ElementAt(i));
+                E.Add(n.ElementAt(i) * p.ElementAt(i));
+                sumA += list1.ElementAt(i);
+                sumB += list2.ElementAt(i);
+                sumN += n.ElementAt(i);
+            }
+
+            List<double> expectedA = new List<double>();
+            List<double> expectedB = new List<double>();
+
+            double statistic = 0;
+
+            for (int i = 0; i < list1.Count(); i++)
+            {
+                expectedA.Add((n.ElementAt(i)/sumN)*sumA);
+                expectedB.Add((n.ElementAt(i) / sumN) * sumB);
+                statistic += ((list1.ElementAt(i) - expectedA.ElementAt(i)) * (list1.ElementAt(i) - expectedA.ElementAt(i))) / expectedA.ElementAt(i);
+                statistic += ((list2.ElementAt(i) - expectedB.ElementAt(i)) * (list2.ElementAt(i) - expectedB.ElementAt(i))) / expectedB.ElementAt(i);
+            }
+            int df = (list1.Count() - 1);
+
+            double pval = 1.0-ContinuousDistribution.chisquareCdf(statistic, df);
+            return new Test
+            {
+                TestValue= Math.Round(statistic, 5),
+                DegreesOfFreedom= df,
+                PValue= Math.Round(pval,4)
+            };
+        }
+
+        public static Test CalculateChiSquaredTest(this IEnumerable<double> list)
+        {
+            double sumN = 0;
+
+            int n = list.Count();
+            double statistic = 0;
+            for (int i = 0; i < n; i++)
+            {
+                sumN += list.ElementAt(i);
+            }
+
+            double expectedA = sumN / n;
+
+            for (int i = 0; i < n; i++)
+            {
+                statistic += ((list.ElementAt(i) - expectedA) * (list.ElementAt(i) - expectedA)) / expectedA;
+            }
+            int df = n - 1;
+            double pval = 1.0 - ContinuousDistribution.chisquareCdf(statistic, df);
+            
+            return new Test
+            {
+                TestValue = Math.Round(statistic, 5),
+                DegreesOfFreedom = df,
+                PValue = Math.Round(pval, 4)
+            };
+        }
+
     }
 }

@@ -424,5 +424,34 @@ namespace TestAnalizaWyników
             Assert.AreEqual(f24DenomDf, 3);
             Assert.AreEqual(f24pVal, 0.15353);
         }
+
+        [TestMethod]
+        public void ChiSquaredTest()
+        {
+            double x1= Statystyki.CalculateChiSquaredTest(tableDouble1).TestValue;
+            double x1pVal = Statystyki.CalculateChiSquaredTest(tableDouble1).PValue;
+            double x1Df = Statystyki.CalculateChiSquaredTest(tableDouble1).DegreesOfFreedom;
+
+            Assert.AreEqual(x1, 3.33333);
+            Assert.AreEqual(x1Df, 4);
+            Assert.AreEqual(x1pVal, 0.5037);
+
+            double x13 = Statystyki.CalculateChiSquaredTest(tableDouble1,tableDouble3).TestValue;
+            double x13pval = Statystyki.CalculateChiSquaredTest(tableDouble1, tableDouble3).PValue;
+            double x13Df= Statystyki.CalculateChiSquaredTest(tableDouble1, tableDouble3).DegreesOfFreedom;
+
+            Assert.AreEqual(x13, 0.43401);
+            Assert.AreEqual(x13pval, 0.9796);
+            Assert.AreEqual(x13Df, 4);
+
+            double x24 = Statystyki.CalculateChiSquaredTest(tableDouble2, tableDouble4).TestValue;
+            double x24pval = Statystyki.CalculateChiSquaredTest(tableDouble2, tableDouble4).PValue;
+            double x24Df = Statystyki.CalculateChiSquaredTest(tableDouble2, tableDouble4).DegreesOfFreedom;
+
+            Assert.AreEqual(x24, 0.375);
+            Assert.AreEqual(x24pval, 0.9454);
+            Assert.AreEqual(x24Df, 3);
+
+        }
     }
 }

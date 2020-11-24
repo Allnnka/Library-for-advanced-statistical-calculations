@@ -14,8 +14,8 @@ namespace PracaInzynierska
             //double[] tablicaDouble1 = {4.13,4.53,4.69, 4.76,4.77,4.96,4.97,5,5.04,5.10,5.25,5.36,5.94,6.06,6.19,6.30,7.73};
            
            
-            double[] t1 = {7,87,12,9 };
-            double[] t2 = { 4,102,7,8};
+            double[] t1 = {17,25,39,42,32 };
+            double[] t2 = { 5,21,34,49,25};
 
             double[] tablicaDouble1 = { 1, 2, 3, 4, 5 };
             double[] tablicaDouble2 = { 1, 2, 3, 4 };

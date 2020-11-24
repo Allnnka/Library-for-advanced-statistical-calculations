@@ -452,6 +452,14 @@ namespace TestAnalizaWyników
             Assert.AreEqual(x24pval, 0.9454);
             Assert.AreEqual(x24Df, 3);
 
+            double x242 = Statystyki.CalculateChiSquaredTest(tableDouble2, tableDouble4, tableDouble2).TestValue;
+            double x242pval = Statystyki.CalculateChiSquaredTest(tableDouble2, tableDouble4, tableDouble2).PValue;
+            double x242Df = Statystyki.CalculateChiSquaredTest(tableDouble2, tableDouble4, tableDouble2).DegreesOfFreedom;
+
+            Assert.AreEqual(x242, 0.47619);
+            Assert.AreEqual(x242pval, 0.9981);
+            Assert.AreEqual(x242Df, 6);
+
         }
     }
 }

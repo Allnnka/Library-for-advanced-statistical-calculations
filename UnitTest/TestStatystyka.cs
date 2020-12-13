@@ -110,6 +110,32 @@ namespace TestAnalizaWyników
             CollectionAssert.AreEqual(new List<double>() {1}, moda4);
 
         }
+        [TestMethod]
+        public void TestCalculateKurtosisDouble()
+        {
+            double k1 = Statystyki.CalculateKurtosis(tableDouble1);
+            double k2 = Statystyki.CalculateKurtosis(tableDouble2);
+            double k3 = Statystyki.CalculateKurtosis(tableDouble3);
+            double k4 = Statystyki.CalculateKurtosis(tableDouble4);
+
+            Assert.AreEqual(k1, 1.7);
+            Assert.AreEqual(k2, 1.64);
+            Assert.AreEqual(k3, 1.166667);
+            Assert.AreEqual(k4, 2.333333);
+        }
+        public void TestCalculateKurtosisInt()
+        {
+            double k1 = Statystyki.CalculateKurtosis(tableInt1);
+            double k2 = Statystyki.CalculateKurtosis(tableInt2);
+            double k3 = Statystyki.CalculateKurtosis(tableInt3);
+            double k4 = Statystyki.CalculateKurtosis(tableInt4);
+
+            Assert.AreEqual(k1, 1.7);
+            Assert.AreEqual(k2, 1.64);
+            Assert.AreEqual(k3, 1.166667);
+            Assert.AreEqual(k4, 2.333333);
+        }
+
 
         [TestMethod]
         public void TestPearsonsCorrelationCoefficient()
@@ -126,6 +152,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.05767, cor1PValue);
             Assert.AreEqual(0.2254, cor2PValue);
         }
+       
 
         [TestMethod]
         public void TestCalculateSingleSampleStudentsTTest()
@@ -460,6 +487,16 @@ namespace TestAnalizaWyników
             Assert.AreEqual(x242pval, 0.9981);
             Assert.AreEqual(x242Df, 6);
 
+        }
+
+        [TestMethod]
+        public void SpearmanCorrelationTest()
+        {
+            double p13 = Statystyki.CalculateSpearmanCorrelation(tableDouble1, tableDouble3).TestValue;
+            double p13pVal = Statystyki.CalculateSpearmanCorrelation(tableDouble1, tableDouble3).PValue;
+
+            //Assert.AreEqual(p13, 0.866025);
+            //Assert.AreEqual(p13pVal, 0.05767);
         }
     }
 }

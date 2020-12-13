@@ -222,13 +222,38 @@ namespace PracaInzynierska.Statystyka
             return _calculateMode(copy);
         }
 
-        public static double CalculateKurtosis(this IEnumerable<double> list)
+        private static double _calculateKurtosis(List<double> list)
         {
             int n = list.Count();
             double mean = CalculateMean(list);
+            double sum2 = 0;
+            double sum4 = 0;
+            foreach (double item in list)
+            {
+                sum2 += (item - mean) * (item - mean);
+                sum4 += (item - mean) * (item - mean) * (item - mean) * (item - mean);
+            }
+            double k = (n * sum4) / (sum2 * sum2);
+            return Math.Round(k, 6);
+        }
 
-            return (n * (n + 1) * list.Sum(x => Math.Pow((x - mean),4))-3*list.Sum(x=>((x- mean) * (x - mean))) * list.Sum(x => ((x - mean) * (x - mean)))*(n-1))/
-                ((n-1)*(n-2)*(n-3)*Math.Pow(CalculateStandardDeviation(list),4));
+        public static double CalculateKurtosis(this IEnumerable<double> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add(item);
+            return _calculateKurtosis(copy);
+        }
+        public static double CalculateKurtosis(this IEnumerable<int> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return _calculateKurtosis(copy);
+        }
+        public static double CalculateKurtosis(this IEnumerable<long> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (long item in list) copy.Add((double)item);
+            return _calculateKurtosis(copy);
         }
         public struct LinearCorrelation
         {
@@ -371,9 +396,9 @@ namespace PracaInzynierska.Statystyka
             int n = list.Count();
             Rank r;
             if (hypotheticalMedian != 0)
-                r = Ranks.CalculateRank(Util.DifferenceBetweenPairsOfMeasurements(list, hypotheticalMedian));
+                r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list, hypotheticalMedian));
             else
-                r = Ranks.CalculateRank(list);
+                r = Ranks.CalculateRankForWilcoxonTest(list);
 
             double WValue = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
 
@@ -399,7 +424,7 @@ namespace PracaInzynierska.Statystyka
             //if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
 
             int n = Math.Max(list1.Count(),list2.Count());
-            Rank r = Ranks.CalculateRank(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
+            Rank r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
 
             double w = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
             double nRanks = (double)r.NumberOfRanks;
@@ -710,6 +735,7 @@ namespace PracaInzynierska.Statystyka
                 
             };
         }
+
         //https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/8-chi-squared-tests
 
         public static Test CalculateChiSquaredTest(this IEnumerable<double> list)
@@ -739,12 +765,14 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(pval, 4)
             };
         }
-
-
         public static Test CalculateChiSquaredTest(params IEnumerable<double>[] args)
         {
             int nCols = args.Length;
             int nRows = args.FirstOrDefault().Count();
+            foreach (IEnumerable<double> list in args)
+            {
+                if (nRows != list.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
+            }
             List<double> n = Enumerable.Repeat<double>(0, nRows).ToList();
 
             List<double> sumOfCols = new List<double>();
@@ -753,9 +781,9 @@ namespace PracaInzynierska.Statystyka
             {
                 for (int i = 0; i < nRows; i++)
                 {
-                    n[i]+= list.ElementAt(i);
+                    n[i] += list.ElementAt(i);
                 }
-                 sumOfCols.Add(list.Sum());
+                sumOfCols.Add(list.Sum());
             }
             double totalSum = sumOfCols.Sum();
             double statistic = 0;
@@ -765,7 +793,7 @@ namespace PracaInzynierska.Statystyka
             {
                 for (int i = 0; i < nRows; i++)
                 {
-                    expected = (n.ElementAt(i) / totalSum)* sumOfCols.ElementAt(rowNum);
+                    expected = (n.ElementAt(i) / totalSum) * sumOfCols.ElementAt(rowNum);
                     statistic += ((list.ElementAt(i) - expected) * (list.ElementAt(i) - expected)) / expected;
                 }
                 rowNum++;
@@ -775,8 +803,33 @@ namespace PracaInzynierska.Statystyka
             return new Test
             {
                 TestValue = Math.Round(statistic, 5),
-                DegreesOfFreedom= df,
-                PValue= Math.Round(pval,4)
+                DegreesOfFreedom = df,
+                PValue = Math.Round(pval, 4)
+            };
+        }
+
+        public static Test CalculateSpearmanCorrelation(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            int n = list1.Count();
+            List<double> d = new List<double>();
+            double r = 0;
+
+            for (int i = 0; i < n; i++)
+            {
+                d.Add(Ranks.CalculateRanks(list1)[Math.Abs(list1.ElementAt(i))] - Ranks.CalculateRanks(list2)[Math.Abs(list2.ElementAt(i))]);
+                r += d.ElementAt(i) * d.ElementAt(i);
+            }
+            Console.WriteLine("r: " + r);
+
+            double p =1.0- (6 * r) / ((double)n * ((double)n * (double)n - 1.0));
+            double t = p * Math.Sqrt((n - 2.0) / (1.0 - p * p));
+            double pval =ContinuousDistribution.Student(t,n-2);
+
+
+            return new Test
+            {
+                TestValue = Math.Round(p, 7),
+                PValue = Math.Round(pval, 5)
             };
         }
 

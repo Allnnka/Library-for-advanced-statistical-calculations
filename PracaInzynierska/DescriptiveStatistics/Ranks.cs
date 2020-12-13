@@ -15,7 +15,7 @@ namespace PracaInzynierska.DescriptiveStatistics
             public double SumOfNegativeRanks;
             public double CorrectionForTiedRanks;
         }
-        public static Rank CalculateRank(this IEnumerable<double> list)
+        public static Dictionary<double, double> CalculateRanks(this IEnumerable<double> list)
         {
             list = list.Where(x => x != 0);
             int n = list.Count();
@@ -23,24 +23,7 @@ namespace PracaInzynierska.DescriptiveStatistics
 
             Dictionary<double, double> dictOfPairs = list.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)0);
             List<double> listOfRanks = list.ToList();
-            int ranksTabN = list.Select(x => Math.Abs(x)).Distinct().Count();
-            double numberTiedRanks = list.GroupBy(x => Math.Abs(x)).Where(x => x.Count() > 1).Sum(x => x.Count());
 
-            Dictionary<double, double> tiedPairs = list.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)x.Count());
-            double sumPositive = 0;
-            double sumNegative = 0;
-
-            if (n == 1)
-            {
-                if (dictOfPairs[1] > 0)
-                {
-                    sumPositive++;
-                }
-                else
-                {
-                    sumNegative++;
-                }
-            }
             double m = 0;
             double nSum = 0;
             for (int i = 0; i < n - 1; i++)
@@ -69,9 +52,45 @@ namespace PracaInzynierska.DescriptiveStatistics
                     dictOfPairs[Math.Abs(listOfRanks.ElementAt(n - 1))] = ((nSum + n) / (m + 1));
                 }
             }
+            return dictOfPairs;
+        }
 
+        public static double SumOfTiedPairs(this IEnumerable<double> list)
+        {
+            Dictionary<double, double> tiedPairs = list.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)x.Count());
 
-            foreach (double item in listOfRanks)
+            double sum = 0;
+
+            foreach (var i in tiedPairs)
+            {
+                sum += (i.Value * i.Value * i.Value) - i.Value;
+            }
+
+            return sum;
+        }
+        public static Rank CalculateRankForWilcoxonTest(this IEnumerable<double> list)
+        {
+            list = list.Where(x => x != 0);
+            int n = list.Count();
+            list = list.OrderBy(x => Math.Abs(x)).ToList();
+
+            Dictionary<double, double> dictOfPairs = CalculateRanks(list);
+
+            double sumPositive = 0;
+            double sumNegative = 0;
+
+            if (n == 1)
+            {
+                if (dictOfPairs[1] > 0)
+                {
+                    sumPositive++;
+                }
+                else
+                {
+                    sumNegative++;
+                }
+            }
+            foreach (double item in list)
             {
                 if (item > 0)
                 {
@@ -83,13 +102,7 @@ namespace PracaInzynierska.DescriptiveStatistics
                 }
             }
 
-            double sum = 0;
-
-            foreach (var i in tiedPairs)
-            {
-                sum += (i.Value * i.Value * i.Value) - i.Value;
-            }
-            double correctionForTied = (sum / 48.0);
+            double correctionForTied = (SumOfTiedPairs(list) / 48.0);
 
             return new Rank
             {
@@ -117,38 +130,8 @@ namespace PracaInzynierska.DescriptiveStatistics
             int n = list1.Count();
             list1 = list1.OrderBy(x => Math.Abs(x)).ToList();
 
-            Dictionary<double, double> dictOfPairs = list1.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)0);
-            List<double> listOfRanks = list1.ToList();
-
-            Dictionary<double, double> tiedPairs = list1.GroupBy(x => Math.Abs(x)).ToDictionary(x => Math.Abs(x.Key), x => (double)x.Count());
-            double m = 0;
-            double nSum = 0;
-            for (int i = 0; i < n - 1; i++)
-            {
-                m += 1;
-                nSum += (i + 1);
-                if (Math.Abs(listOfRanks.ElementAt(i)) != Math.Abs(listOfRanks.ElementAt(i + 1)))
-                {
-                    if (m == 0)
-                    {
-                        dictOfPairs[Math.Abs(listOfRanks.ElementAt(i))] = nSum;
-                    }
-                    else
-                    {
-                        dictOfPairs[Math.Abs(listOfRanks.ElementAt(i))] = (nSum / m);
-                    }
-                    m = 0;
-                    nSum = 0;
-                }
-                if (Math.Abs(listOfRanks.ElementAt(n - 2)) != Math.Abs(listOfRanks.ElementAt(n - 1)))
-                {
-                    dictOfPairs[Math.Abs(listOfRanks.ElementAt(n - 1))] = n;
-                }
-                if (Math.Abs(listOfRanks.ElementAt(n - 2)) == Math.Abs(listOfRanks.ElementAt(n - 1)))
-                {
-                    dictOfPairs[Math.Abs(listOfRanks.ElementAt(n - 1))] = ((nSum + n) / (m + 1));
-                }
-            }
+            Dictionary<double, double> dictOfPairs = CalculateRanks(list1);
+           
             double sumValue=0;
             double lengthValue = 0;
 
@@ -161,7 +144,7 @@ namespace PracaInzynierska.DescriptiveStatistics
                 {
                     if (list2.ElementAt(i) == item)
                     {
-                        sumValue += dictOfPairs[Math.Abs(listOfRanks.ElementAt(i))];
+                        sumValue += dictOfPairs[Math.Abs(list1.ElementAt(i))];
                         lengthValue++;
                     }
                 }
@@ -177,13 +160,7 @@ namespace PracaInzynierska.DescriptiveStatistics
                 sumRij += (sumValues.ElementAt(i) * sumValues.ElementAt(i)) / lengthValues.ElementAt(i);
             }
 
-            double sum = 0;
-            foreach (var i in tiedPairs)
-            {
-                sum += ((i.Value * i.Value * i.Value) - i.Value);
-            }
-
-            double correctionForTied = 1.0-(sum / (n * n * n - n));
+            double correctionForTied = 1.0-(SumOfTiedPairs(list1) / (n * n * n - n));
 
             return new RanksForKruskalaWallisa
             {

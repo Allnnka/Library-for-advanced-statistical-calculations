@@ -260,29 +260,29 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestCalculateWilcoxonTest()
         {
-            double w1 = Statystyki.CalculateWilcoxonTest(tableDouble1).WValue;
+            double w1 = Statystyki.CalculateWilcoxonTest(tableDouble1).T;
             double w1PValue = Statystyki.CalculateWilcoxonTest(tableDouble1).PValue;
 
-            double w1mu = Statystyki.CalculateWilcoxonTest(tableDouble1, 2).WValue;
+            double w1mu = Statystyki.CalculateWilcoxonTest(tableDouble1, 2).T;
             double w1muPValue = Statystyki.CalculateWilcoxonTest(tableDouble1, 2).PValue;
 
-            double w2 = Statystyki.CalculateWilcoxonTest(tableDouble2).WValue;
+            double w2 = Statystyki.CalculateWilcoxonTest(tableDouble2).T;
             double w2PValue = Statystyki.CalculateWilcoxonTest(tableDouble2).PValue;
 
 
-            double w3 = Statystyki.CalculateWilcoxonTest(tableDouble3).WValue;
+            double w3 = Statystyki.CalculateWilcoxonTest(tableDouble3).T;
             double w3PValue = Statystyki.CalculateWilcoxonTest(tableDouble3).PValue;
 
-            double w4 = Statystyki.CalculateWilcoxonTest(tableDouble4).WValue;
+            double w4 = Statystyki.CalculateWilcoxonTest(tableDouble4).T;
             double w4PValue = Statystyki.CalculateWilcoxonTest(tableDouble4).PValue;
 
-            double w4mu = Statystyki.CalculateWilcoxonTest(tableDouble4, 1).WValue;
+            double w4mu = Statystyki.CalculateWilcoxonTest(tableDouble4, 1).T;
             double w4muPvalue = Statystyki.CalculateWilcoxonTest(tableDouble4, 1).PValue;
 
 
 
             Assert.AreEqual(15, w1);
-            //Assert.AreEqual(0.0625, w1PValue);
+           // Assert.AreEqual(0.0625, w1PValue);
 
             Assert.AreEqual(8.5, w1mu);
             Assert.AreEqual(0.2693, w1muPValue);
@@ -291,10 +291,10 @@ namespace TestAnalizaWyników
             //Assert.AreEqual(0.125, w2PValue);
 
             Assert.AreEqual(15, w3);
-            //Assert.AreEqual(0.05334,w3PValue);
+            Assert.AreEqual(0.0533,w3PValue);
 
             Assert.AreEqual(10, w4);
-            //Assert.AreEqual(0.08897, w4PValue);
+            Assert.AreEqual(0.089, w4PValue);
 
             Assert.AreEqual(1, w4mu);
             Assert.AreEqual(1, w4muPvalue);
@@ -304,11 +304,11 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestWilcoxonMatchedPairsTest()
         {
-            double w13 = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3).WValue;
-            double w13PValue = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3).PValue;
+            double w13 = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3,true).T;
+            double w13PValue = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3, true).PValue;
 
-            double w24 = Statystyki.CalculateWilcoxonTest(tableDouble2, tableDouble4).WValue;
-            double w24PValue = Statystyki.CalculateWilcoxonTest(tableDouble2, tableDouble4).PValue;
+            double w24 = Statystyki.CalculateWilcoxonTest(tableDouble2, tableDouble4, true).T;
+            double w24PValue = Statystyki.CalculateWilcoxonTest(tableDouble2, tableDouble4, true).PValue;
 
 
             Assert.AreEqual(10, w13);
@@ -316,9 +316,24 @@ namespace TestAnalizaWyników
             //wilcox.test(d2,d4, paired=TRUE) in RStudio
             Assert.AreEqual(6, w24);
             Assert.AreEqual(w24PValue,0.1736);
+        }
 
-            double w14PValue = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble4).PValue;
-            //Assert.AreEqual(0.09481, w14PValue);
+        [TestMethod]
+        public void TestUMannaWhitneya()
+        {
+            //in RStudio to samo co wilcox.test(d1,d4)
+
+            double w13 = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3).T;
+            double w13PValue = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3).PValue;
+            Assert.AreEqual(20.5, w13);
+            Assert.AreEqual(0.1015, w13PValue);
+
+
+            double w14 = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble4).T;
+            double w14PValue = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble4).PValue;
+            
+            Assert.AreEqual(17, w14);
+            Assert.AreEqual(0.0948, w14PValue);
         }
         [TestMethod]
         public void TestKolmogorovSmirnovTests()

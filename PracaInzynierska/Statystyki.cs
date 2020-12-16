@@ -167,8 +167,6 @@ namespace PracaInzynierska.Statystyka
             return (CalculateMean(list) - CalculateMedian(list)) / CalculateStandardDeviation(list);
         }
 
-
-
         //TODO: histogram, dominanta/moda/modalna, kurtoza
         public static List<double> _calculateMode(List<double> list)
         {
@@ -385,12 +383,11 @@ namespace PracaInzynierska.Statystyka
             public int SampleSize;
             public double SumOfPositiveRanks;
             public double SumOfNegativeRanks;
-            public double WValue;
+            public double T;
+            public double TCritic;
             public double ZStatistic;
             public double PValue;
         }
-
-        
         public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list,double hypotheticalMedian=0)
         {
             int n = list.Count();
@@ -400,13 +397,16 @@ namespace PracaInzynierska.Statystyka
             else
                 r = Ranks.CalculateRankForWilcoxonTest(list);
 
-            double WValue = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
+            double t = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
 
             double nRanks = r.NumberOfRanks;
 
-            double z = (Math.Abs(WValue - ((nRanks * (nRanks + 1)) / 4)) - 0.5) / Math.Sqrt(((nRanks*(nRanks+1)*(2*nRanks+1))/24)-r.CorrectionForTiedRanks);
+            
+            double zValue = (Math.Abs(t - ((nRanks * (nRanks + 1)) / 4)) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1) * (2 * nRanks + 1)) / 24) - r.CorrectionForTiedRanks);
+
            
-            double p = 2*ContinuousDistribution.Gauss(-Math.Abs(z));
+
+            double p = 2*ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
 
             return new WilcoxonTest
@@ -414,32 +414,96 @@ namespace PracaInzynierska.Statystyka
                 SampleSize = n,
                 SumOfPositiveRanks = r.SumOfPositiveRanks,
                 SumOfNegativeRanks = r.SumOfNegativeRanks,
-                WValue = WValue,
-                ZStatistic = z,
+                T = t,
+                ZStatistic = zValue,
                 PValue = Math.Round(p, 4)
             };
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list1,IEnumerable<double> list2)
+        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list1,IEnumerable<double> list2, bool pairs = false)
         {
-            //if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
+            double t;
+            double zValue;
+            double p;
+            if (pairs) {
+                int n = Math.Max(list1.Count(), list2.Count());
+                Rank r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
+                foreach (var el in Util.DifferenceBetweenPairsOfMeasurements(list1, list2))
+                {
+                    Console.WriteLine(el);
+                }
+                t = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
+                double nRanks = (double)r.NumberOfRanks;
 
-            int n = Math.Max(list1.Count(),list2.Count());
-            Rank r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
+                zValue = ((Math.Abs(t - ((nRanks * (nRanks + 1)) / 4))) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1) * (2 * nRanks + 1)) / 24) - r.CorrectionForTiedRanks);
 
-            double w = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
-            double nRanks = (double)r.NumberOfRanks;
+                p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
+            }
+            else
+            {
+                int n1 = list1.Count();
+                int n2 = list2.Count();
+                List<double> list3 = list1.Concat(list2).OrderBy(x => Math.Abs(x)).ToList();
+                Dictionary<double, double> dictOfPairs = Ranks.CalculateRanks(list3);
+                double r1 = 0;
+                double r2 = 0;
 
-            double zValue = ((Math.Abs(w - ((nRanks * (nRanks + 1)) / 4)))-0.5)/ Math.Sqrt(((nRanks * (nRanks + 1) * (2 * nRanks + 1)) / 24) - r.CorrectionForTiedRanks);
+                double u1 = 0, u2 = 0;
+                foreach (double item in list1)
+                {
+                    r1 += dictOfPairs[Math.Abs(item)];
+                }
+                foreach (double item in list2)
+                {
+                    r2 += dictOfPairs[Math.Abs(item)];
+                }
+                u1 = n1 * n2 + ((n1 * (n1 + 1.0)) / 2.0) - r1;
 
-            double p = 2*ContinuousDistribution.Gauss(-Math.Abs(zValue));
+                t = n1 * n2 + ((n2 * (n2 + 1.0)) / 2.0) - r2;
+
+                double correctionForTied = (n1 * n2 * Ranks.SumOfTiedPairs(list3)) / (12.0 * (n1 + n2) * (n1 + n2 - 1.0));
+                zValue = (Math.Abs(t - (n1 * n2) / 2.0) - 0.5) / Math.Sqrt((n1 * n2 * (n1 + n2 + 1.0)) / 12.0 - correctionForTied);
+                p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
+            }
+            
             return new WilcoxonTest
             {
-                SampleSize = n,
-                SumOfPositiveRanks = r.SumOfPositiveRanks,
-                SumOfNegativeRanks = r.SumOfNegativeRanks,
-                WValue = w,
+                T = t,
                 ZStatistic = zValue,
                 PValue=Math.Round(p,4)
+            };
+        }
+
+        public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            int n1 = list1.Count();
+            int n2 = list2.Count();
+            List<double> list3 = list1.Concat(list2).OrderBy(x => Math.Abs(x)).ToList();
+            Dictionary<double, double> dictOfPairs = Ranks.CalculateRanks(list3);
+            double r1 = 0;
+            double r2 = 0;
+
+            double u1 = 0, u2 = 0;
+            foreach(double item in list1)
+            {
+                r1+= dictOfPairs[Math.Abs(item)];
+            }
+            foreach (double item in list2)
+            {
+                r2 += dictOfPairs[Math.Abs(item)];
+            }
+            u1 = n1 * n2 + ((n1 * (n1 + 1.0)) / 2.0) - r1;
+
+            u2 = n1 * n2 + ((n2 * (n2 + 1.0)) / 2.0) - r2;
+
+            double correctionForTied = (n1 * n2 * Ranks.SumOfTiedPairs(list3)) / (12.0 * (n1 + n2) * (n1 + n2 - 1.0));
+            double zValue = (Math.Abs(u2 - (n1 * n2) / 2)-0.5)/Math.Sqrt((n1*n2*(n1+n2+1.0))/12-correctionForTied);
+            double p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
+
+            return new WilcoxonTest
+            {
+                T = u2,
+                ZStatistic = zValue,
+                PValue = Math.Round(p, 4)
             };
         }
 
@@ -692,12 +756,48 @@ namespace PracaInzynierska.Statystyka
         {
             if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
 
-            RanksForKruskalaWallisa r = Ranks.CalculateRankForKruskalaWallisa(list1, list2);
+            List<double> factorList = list2.Distinct().ToList();
 
-            double kwScore = ((12.0 * r.sumValue) / (r.nValue * (r.nValue + 1.0)) - 3.0 * (r.nValue + 1.0));
-            kwScore =kwScore/r.CorrectionForTiedRanks;
+            List<double> list = list1.Concat(list2).ToList();
+            int n = list1.Count();
+            list1 = list1.OrderBy(x => Math.Abs(x)).ToList();
+
+            Dictionary<double, double> dictOfPairs = Ranks.CalculateRanks(list1);
+
+            double sumValue = 0;
+            double lengthValue = 0;
+
+            List<double> sumValues = new List<double>();
+            List<double> lengthValues = new List<double>();
+
+            foreach (double item in factorList)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    if (list2.ElementAt(i) == item)
+                    {
+                        sumValue += dictOfPairs[Math.Abs(list1.ElementAt(i))];
+                        lengthValue++;
+                    }
+                }
+                sumValues.Add(sumValue);
+                lengthValues.Add(lengthValue);
+                sumValue = 0;
+                lengthValue = 0;
+            }
+
+            double sumRij = 0;
+            for (int i = 0; i < sumValues.Count(); i++)
+            {
+                sumRij += (sumValues.ElementAt(i) * sumValues.ElementAt(i)) / lengthValues.ElementAt(i);
+            }
+
+            double correctionForTied = 1.0 - (Ranks.SumOfTiedPairs(list1) / (n * n * n - n));
+
+            double kwScore = ((12.0 * sumRij) / (n * (n + 1.0)) - 3.0 * (n + 1.0));
+            kwScore =kwScore/ correctionForTied;
             kwScore =Math.Round(kwScore,1);
-            int df = r.NLevelsList2 - 1;
+            int df = factorList.Count() - 1;
             double pVal = 1.0- ContinuousDistribution.chisquareCdf(kwScore,df);
             return new Test
             {
@@ -706,7 +806,6 @@ namespace PracaInzynierska.Statystyka
                 DegreesOfFreedom=df
             };
         }
-
 
         public struct FTest
         {
@@ -832,6 +931,8 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(pval, 5)
             };
         }
+
+       
 
     }
 }

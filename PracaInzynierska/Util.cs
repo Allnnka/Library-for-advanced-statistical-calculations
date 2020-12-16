@@ -35,24 +35,27 @@ namespace PracaInzynierska
         {
 
             List<double> listOfDifference = new List<double>();
-            int n = Math.Max(list1.Count(), list2.Count());
-            if (list1.Count() == list2.Count())
+            int minN = Math.Min(list1.Count(), list2.Count());
+            int maxN = Math.Max(list1.Count(), list2.Count());
+            for (int i = 0; i < minN; i++)
             {
-                for (int i = 0; i < n; i++)
-                {
-                    listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
-                }
+                listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
             }
-            else
+            if(list1.Count() != list2.Count())
             {
-                for (int i = 0; i < n; i++)
+                if (list1.Count() == maxN)
                 {
-                    if (list1.Count() < n)
-                        listOfDifference.Add(list2.ElementAt(i));
-                    else if (list2.Count() < n)
+                    for(int i = minN; i < maxN; i++)
+                    {
                         listOfDifference.Add(list1.ElementAt(i));
-                    else
-                        listOfDifference.Add(list1.ElementAt(i) - list2.ElementAt(i));
+                    }
+                }
+                if (list2.Count() == maxN)
+                {
+                    for (int i = minN; i < maxN; i++)
+                    {
+                        listOfDifference.Add(list2.ElementAt(i));
+                    }
                 }
             }
             return listOfDifference;

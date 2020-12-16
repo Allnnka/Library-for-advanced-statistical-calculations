@@ -380,9 +380,6 @@ namespace PracaInzynierska.Statystyka
      
         public struct WilcoxonTest
         {
-            public int SampleSize;
-            public double SumOfPositiveRanks;
-            public double SumOfNegativeRanks;
             public double T;
             public double TCritic;
             public double ZStatistic;
@@ -390,6 +387,7 @@ namespace PracaInzynierska.Statystyka
         }
         public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list,double hypotheticalMedian=0)
         {
+            double zValue;
             int n = list.Count();
             Rank r;
             if (hypotheticalMedian != 0)
@@ -401,19 +399,15 @@ namespace PracaInzynierska.Statystyka
 
             double nRanks = r.NumberOfRanks;
 
-            
-            double zValue = (Math.Abs(t - ((nRanks * (nRanks + 1)) / 4)) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1) * (2 * nRanks + 1)) / 24) - r.CorrectionForTiedRanks);
-
-           
+            if(hypotheticalMedian==0)
+                zValue = (t - (nRanks * (nRanks + 1.0) / 4.0)) / Math.Sqrt((nRanks * (nRanks + 1.0) * (2.0 * nRanks + 1.0)) / 24.0);
+            else
+                zValue = (Math.Abs(t - ((nRanks * (nRanks + 1.0)) / 4.0)) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1.0) * (2.0 * nRanks + 1.0)) / 24.0) - r.CorrectionForTiedRanks);
 
             double p = 2*ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
-
             return new WilcoxonTest
             {
-                SampleSize = n,
-                SumOfPositiveRanks = r.SumOfPositiveRanks,
-                SumOfNegativeRanks = r.SumOfNegativeRanks,
                 T = t,
                 ZStatistic = zValue,
                 PValue = Math.Round(p, 4)
@@ -421,9 +415,7 @@ namespace PracaInzynierska.Statystyka
         }
         public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list1,IEnumerable<double> list2, bool pairs = false)
         {
-            double t;
-            double zValue;
-            double p;
+           
             if (pairs) {
                 int n = Math.Max(list1.Count(), list2.Count());
                 Rank r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
@@ -431,46 +423,25 @@ namespace PracaInzynierska.Statystyka
                 {
                     Console.WriteLine(el);
                 }
-                t = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
+                double t = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
                 double nRanks = (double)r.NumberOfRanks;
 
-                zValue = ((Math.Abs(t - ((nRanks * (nRanks + 1)) / 4))) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1) * (2 * nRanks + 1)) / 24) - r.CorrectionForTiedRanks);
+                double zValue = ((Math.Abs(t - ((nRanks * (nRanks + 1)) / 4))) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1) * (2 * nRanks + 1)) / 24) - r.CorrectionForTiedRanks);
 
-                p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
+                double p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
+
+                return new WilcoxonTest
+                {
+                    T = t,
+                    ZStatistic = zValue,
+                    PValue = Math.Round(p, 4)
+                };
             }
             else
             {
-                int n1 = list1.Count();
-                int n2 = list2.Count();
-                List<double> list3 = list1.Concat(list2).OrderBy(x => Math.Abs(x)).ToList();
-                Dictionary<double, double> dictOfPairs = Ranks.CalculateRanks(list3);
-                double r1 = 0;
-                double r2 = 0;
-
-                double u1 = 0, u2 = 0;
-                foreach (double item in list1)
-                {
-                    r1 += dictOfPairs[Math.Abs(item)];
-                }
-                foreach (double item in list2)
-                {
-                    r2 += dictOfPairs[Math.Abs(item)];
-                }
-                u1 = n1 * n2 + ((n1 * (n1 + 1.0)) / 2.0) - r1;
-
-                t = n1 * n2 + ((n2 * (n2 + 1.0)) / 2.0) - r2;
-
-                double correctionForTied = (n1 * n2 * Ranks.SumOfTiedPairs(list3)) / (12.0 * (n1 + n2) * (n1 + n2 - 1.0));
-                zValue = (Math.Abs(t - (n1 * n2) / 2.0) - 0.5) / Math.Sqrt((n1 * n2 * (n1 + n2 + 1.0)) / 12.0 - correctionForTied);
-                p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
+                return CalculateTestUMannaWhitneya(list1, list2);
             }
-            
-            return new WilcoxonTest
-            {
-                T = t,
-                ZStatistic = zValue,
-                PValue=Math.Round(p,4)
-            };
+          
         }
 
         public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<double> list1, IEnumerable<double> list2)
@@ -496,7 +467,7 @@ namespace PracaInzynierska.Statystyka
             u2 = n1 * n2 + ((n2 * (n2 + 1.0)) / 2.0) - r2;
 
             double correctionForTied = (n1 * n2 * Ranks.SumOfTiedPairs(list3)) / (12.0 * (n1 + n2) * (n1 + n2 - 1.0));
-            double zValue = (Math.Abs(u2 - (n1 * n2) / 2)-0.5)/Math.Sqrt((n1*n2*(n1+n2+1.0))/12-correctionForTied);
+            double zValue = (Math.Abs(u2 - (n1 * n2) / 2.0)-0.5)/Math.Sqrt((n1*n2*(n1+n2+1.0))/12.0-correctionForTied);
             double p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
             return new WilcoxonTest
@@ -932,7 +903,6 @@ namespace PracaInzynierska.Statystyka
             };
         }
 
-       
-
+      
     }
 }

@@ -282,7 +282,7 @@ namespace TestAnalizaWyników
 
 
             Assert.AreEqual(15, w1);
-           // Assert.AreEqual(0.0625, w1PValue);
+            Assert.AreEqual(0.0625, w1PValue);
 
             Assert.AreEqual(8.5, w1mu);
             Assert.AreEqual(0.2693, w1muPValue);
@@ -334,6 +334,12 @@ namespace TestAnalizaWyników
             
             Assert.AreEqual(17, w14);
             Assert.AreEqual(0.0948, w14PValue);
+
+            double w43 = Statystyki.CalculateTestUMannaWhitneya(tableDouble4, tableDouble3).T;
+            double w43PValue = Statystyki.CalculateTestUMannaWhitneya(tableDouble4, tableDouble3).PValue;
+
+            Assert.AreEqual(8.5, w43);
+            Assert.AreEqual(0.7656, w43PValue);
         }
         [TestMethod]
         public void TestKolmogorovSmirnovTests()

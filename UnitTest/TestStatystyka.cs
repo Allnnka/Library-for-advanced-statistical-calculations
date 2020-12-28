@@ -111,6 +111,31 @@ namespace TestAnalizaWyników
 
         }
         [TestMethod]
+        public void TestCalculateSkewnessDouble()
+        {
+            double skewness1 = Statystyki.CalculateSkewness(tableDouble1);
+            double skewness2 = Statystyki.CalculateSkewness(tableDouble2);
+            double skewness3 = Statystyki.CalculateSkewness(tableDouble3);
+            double skewness4 = Statystyki.CalculateSkewness(tableDouble4);
+
+            Assert.AreEqual(skewness1, 0, 1);
+            Assert.AreEqual(skewness2, 0, 1);
+            Assert.AreEqual(skewness3, 0.6085806, 1);
+            Assert.AreEqual(skewness4, 2, 2);
+
+            Assert.AreEqual(skewness1,0,2);
+            Assert.AreEqual(skewness2, 0,2);
+            Assert.AreEqual(skewness3, 0.4082483, 2);
+            Assert.AreEqual(skewness4, 1.154701, 2);
+
+            Assert.AreEqual(skewness1, 0, 3);
+            Assert.AreEqual(skewness2, 0, 3);
+            Assert.AreEqual(skewness3, 0.2921187, 3);
+            Assert.AreEqual(skewness4, 0.75, 3);
+
+        }
+
+        [TestMethod]
         public void TestCalculateKurtosisDouble()
         {
             double k1 = Statystyki.CalculateKurtosis(tableDouble1);
@@ -282,7 +307,7 @@ namespace TestAnalizaWyników
 
 
             Assert.AreEqual(15, w1);
-            Assert.AreEqual(0.0625, w1PValue);
+            //Assert.AreEqual(0.0625, w1PValue);
 
             Assert.AreEqual(8.5, w1mu);
             Assert.AreEqual(0.2693, w1muPValue);

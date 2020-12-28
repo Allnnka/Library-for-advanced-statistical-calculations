@@ -25,15 +25,20 @@ namespace PracaInzynierska
             double[] x = { 44.4, 45.9, 41.9, 53.3, 44.7, 44.1, 50.7, 45.2, 60.1 };
             double[] y = { 2.6, 3.1, 2.5, 5.0, 3.6, 4.0, 5.2, 2.8, 3.8 };
 
-            double[] mem = { 50, 15, 25, 12, 45, 3, 45, 8, 10, 8, 7, 20, 9, 9, 12 };
+            double[] mem = { 7, 15, 36, 39, 40, 41 };
 
             double[] da = {2,3.6,2.6,2.6,7.3,3.4,14.9,6.6,2.3,2,6.8,8.5 };
             double[] db = {3.5,5.7,2.9,2.4,9.9,3.3,16.7,6.0,3.8,4,9.1,20.9 };
 
-            double test = Statystyki.CalculateWilcoxonTest(tablicaDouble4, tablicaDouble1).T;
+            double q1 = 0, q2 = 0, q3 = 0;
+            Statystyki.CalculateQuartile(mem, out q1,out q2,out q3);
            // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
 
-            Console.WriteLine("test " + test);
+            Console.WriteLine("q1 " + q1);
+            Console.WriteLine("q2 " + q2);
+
+            Console.WriteLine("q3 " + q3);
+
             //Console.WriteLine("pval " + pval);
             //Console.WriteLine("Max " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfPositiveRanks);
             //Console.WriteLine("Min " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfNegativeRanks);

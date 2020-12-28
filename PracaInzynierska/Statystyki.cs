@@ -46,7 +46,7 @@ namespace PracaInzynierska.Statystyka
 
         public enum StandardDeviationType { Samples, Population };
 
-        public static double CalculateStandardDeviation(this IEnumerable<double> list, StandardDeviationType typ = StandardDeviationType.Samples)
+        public static double CalculateStandardDeviation(this IEnumerable<double> list, StandardDeviationType type = StandardDeviationType.Samples)
         {
             double mean = list.Average();
             double deviation = 0;
@@ -54,35 +54,35 @@ namespace PracaInzynierska.Statystyka
             {
                 deviation += (item - mean) * (item - mean);
             }
-            switch(typ)
+            switch(type)
             {
                 case StandardDeviationType.Population:
-                    if (list.Count() == 0) throw new Exception("Błąd obliczania odchylenia standardowego. Kolekcja jest pusta");
+                    if (list.Count() == 0) throw new Exception("Standard deviation calculation error. The collection is empty");
                     deviation /= list.Count();
                     break;
                 case StandardDeviationType.Samples:
-                    if (list.Count() <= 1) throw new Exception("Błąd obliczania odchylenia standardowego. Niewystarczająca liczebność populacji    ");
+                    if (list.Count() <= 1) throw new Exception("Standard deviation calculation error. Population insufficient");
                     deviation /= list.Count() - 1;
                     break;
                 default:
-                    throw new Exception("Nierozpoznany typ odchylenia standardowego");
+                    throw new Exception("Unrecognized type of standard deviation");
             }
             deviation = Math.Sqrt(deviation);
             return deviation;
         }
 
-        public static double CalculateStandardDeviation(this IEnumerable<float> list, StandardDeviationType typ = StandardDeviationType.Population)
+        public static double CalculateStandardDeviation(this IEnumerable<float> list, StandardDeviationType type = StandardDeviationType.Population)
         {
             List<double> kopia = new List<double>();
             foreach (float wartość in list) kopia.Add((double)wartość);
-            return CalculateStandardDeviation(kopia, typ);
+            return CalculateStandardDeviation(kopia, type);
         }
 
-        public static double CalculateStandardDeviation(this IEnumerable<int> list, StandardDeviationType typ = StandardDeviationType.Population)
+        public static double CalculateStandardDeviation(this IEnumerable<int> list, StandardDeviationType type = StandardDeviationType.Population)
         {
             List<double> kopia = new List<double>();
             foreach (int wartość in list) kopia.Add((double)wartość);
-            return CalculateStandardDeviation(kopia, typ);
+            return CalculateStandardDeviation(kopia, type);
         }
 
         //https://en.wikipedia.org/wiki/Quartile, Method2
@@ -97,13 +97,13 @@ namespace PracaInzynierska.Statystyka
             if (_list.Count % 2 != 0)
             {
                 q2 = _list[_list.Count / 2];
-                for (int i = 0; i < _list.Count / 2; ++i) lowerHalf.Add(_list[i]);
+                for (int i = 0; i < _list.Count / 2+1; ++i) lowerHalf.Add(_list[i]);
                 for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
             else
             {
                 q2 = (_list[_list.Count / 2 - 1] + _list[_list.Count / 2]) / 2.0;
-                for (int i = 0; i < _list.Count / 2 - 1; ++i) lowerHalf.Add(_list[i]);
+                for (int i = 0; i < _list.Count/2; ++i) lowerHalf.Add(_list[i]);
                 for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
 
@@ -126,7 +126,7 @@ namespace PracaInzynierska.Statystyka
 
         private static double _calculateMedian(List<double> list)
         {
-            if (list.Count == 0) throw new Exception("lista nie zawiera elementów");
+            if (list.Count == 0) throw new Exception("The list does not contain items");
 
             list.Sort();
 
@@ -156,29 +156,63 @@ namespace PracaInzynierska.Statystyka
             foreach (long item in list) copy.Add((double)item);
             return _calculateMedian(copy);
         }
+        private static double _calculateSkewness(List<double> list,int type=3)
+        {
+            if (list.Count == 0) throw new Exception("The list does not contain items");
 
+            double m3 = 0;
+            double m2 = 0;
+            int n = list.Count();
+            double mean = CalculateMean(list);
+            foreach(double item in list)
+            {
+                m3 += (item - mean) * (item - mean) * (item - mean);
+                m2 += (item - mean) * (item - mean) ;
+            }
+            double A;
+            switch (type)
+            {
+                case 1:
+                    A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2);
+                    break;
+                case 2:
+                    A= (n*Math.Sqrt(n - 1) * m3) / (Math.Sqrt(m2 * m2 * m2)* (n - 2));
+                    break;
+                case 3:
+                    A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2) 
+                        *Math.Sqrt((1 - 1.0 / n)* (1 - 1.0 / n)* (1 - 1.0 / n));
+                    break;
+                default:
+                    throw new Exception("Invalid 'type' argument.");
+            }
+
+            return Math.Round(A,7);
+        }
         public static double CalculateSkewness(this IEnumerable<int> list)
         {
-            return (CalculateMean(list) - CalculateMedian(list)) / CalculateStandardDeviation(list);
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return _calculateSkewness(copy);
         }
 
         public static double CalculateSkewness(this IEnumerable<double> list)
         {
-            return (CalculateMean(list) - CalculateMedian(list)) / CalculateStandardDeviation(list);
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add(item);
+            return _calculateSkewness(copy);
         }
 
         //TODO: histogram, dominanta/moda/modalna, kurtoza
         public static List<double> _calculateMode(List<double> list)
         {
-            if (list.Count == 0) throw new Exception("Lista nie zawiera elementów");
+            if (list.Count == 0) throw new Exception("The list does not contain items");
 
             List<double> currentMax = new List<double>();
 
-            //Słownik IlośćiWystepowańElementów
             Dictionary<double, int> dictNumberOfOccurrencesOfElements = list.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
 
             if (!((dictNumberOfOccurrencesOfElements.Values.GroupBy(x => x).Where(x => x.Count() >= 1))
-                .Count() > 1)) throw new Exception("Dominanta w danym zbiorze nie występuję");
+                .Count() > 1)) throw new Exception("There is no dominant feature in a given set");
             
             int occurences = 0;
 
@@ -224,14 +258,14 @@ namespace PracaInzynierska.Statystyka
         {
             int n = list.Count();
             double mean = CalculateMean(list);
-            double sum2 = 0;
-            double sum4 = 0;
+            double m2 = 0;
+            double m4 = 0;
             foreach (double item in list)
             {
-                sum2 += (item - mean) * (item - mean);
-                sum4 += (item - mean) * (item - mean) * (item - mean) * (item - mean);
+                m2 += (item - mean) * (item - mean);
+                m4 += (item - mean) * (item - mean) * (item - mean) * (item - mean);
             }
-            double k = (n * sum4) / (sum2 * sum2);
+            double k = (n * m4) / (m2 * m2);
             return Math.Round(k, 6);
         }
 
@@ -387,7 +421,6 @@ namespace PracaInzynierska.Statystyka
         }
         public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list,double hypotheticalMedian=0)
         {
-            double zValue;
             int n = list.Count();
             Rank r;
             if (hypotheticalMedian != 0)
@@ -399,10 +432,8 @@ namespace PracaInzynierska.Statystyka
 
             double nRanks = r.NumberOfRanks;
 
-            if(hypotheticalMedian==0)
-                zValue = (t - (nRanks * (nRanks + 1.0) / 4.0)) / Math.Sqrt((nRanks * (nRanks + 1.0) * (2.0 * nRanks + 1.0)) / 24.0);
-            else
-                zValue = (Math.Abs(t - ((nRanks * (nRanks + 1.0)) / 4.0)) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1.0) * (2.0 * nRanks + 1.0)) / 24.0) - r.CorrectionForTiedRanks);
+            
+            double zValue = (Math.Abs(t - ((nRanks * (nRanks + 1.0)) / 4.0)) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1.0) * (2.0 * nRanks + 1.0)) / 24.0) - r.CorrectionForTiedRanks);
 
             double p = 2*ContinuousDistribution.Gauss(-Math.Abs(zValue));
 

@@ -13,16 +13,19 @@ namespace PracaInzynierska.Statystyka
     {
         public static double CalculateMean(this IEnumerable<double> list)
         {
+            if (list.Count() == 0) throw new EmptyListException();
             return list.Average();
         }
 
         public static double CalculateMean(this IEnumerable<int> list)
         {
+            if (list.Count() == 0) throw new EmptyListException();
             return list.Select(i => (double)i).CalculateMean();
         }
 
         public static double CalculateMean(this IEnumerable<long> list)
         {
+            if (list.Count() == 0) throw new EmptyListException();
             return list.Select(l => (double)l).CalculateMean();
         }
 
@@ -84,39 +87,49 @@ namespace PracaInzynierska.Statystyka
             foreach (int wartość in list) kopia.Add((double)wartość);
             return CalculateStandardDeviation(kopia, type);
         }
-
-        //https://en.wikipedia.org/wiki/Quartile, Method2
-        public static void CalculateQuartile(this IEnumerable<double> list, out double q1, out double q2, out double q3)
+        public struct Quartile
         {
+            public double q1;
+            public double q2;
+            public double q3;
+        }
+        //https://en.wikipedia.org/wiki/Quartile, Method2
+        public static Quartile CalculateQuartile(this IEnumerable<double> list)
+        {
+            if (list.Count() == 0) throw new EmptyListException();
             List<double> _list = list.ToList();
             _list.Sort();
 
             List<double> lowerHalf = new List<double>();
             List<double> upperHalf = new List<double>();
-
+            double q1, q2, q3;
+            q2 = CalculateMedian(list);
             if (_list.Count % 2 != 0)
             {
-                q2 = _list[_list.Count / 2];
                 for (int i = 0; i < _list.Count / 2+1; ++i) lowerHalf.Add(_list[i]);
                 for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
             else
             {
-                q2 = (_list[_list.Count / 2 - 1] + _list[_list.Count / 2]) / 2.0;
                 for (int i = 0; i < _list.Count/2; ++i) lowerHalf.Add(_list[i]);
                 for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
 
             q1 = _calculateMedian(lowerHalf);
             q3 = _calculateMedian(upperHalf);
+            return new Quartile
+            {
+                q1 = q1,
+                q2 = q2,
+                q3 = q3
+            };
         }
 
         public static double CalculateQuarterRange(this IEnumerable<double> list)
         {
-            if (list.Count() < 3) throw new Exception("Danych jest zbyt mało, żeby obliczyć kwartyle (n=" + list.Count() + ")");
-            double q1,q2,q3;
-            CalculateQuartile(list, out q1, out q2, out q3);
-            return q3 - q1;
+            if (list.Count() < 3) throw new NotTheRightSizeException();
+            CalculateQuartile(list);
+            return CalculateQuartile(list).q3 - CalculateQuartile(list).q1;
         }
 
         public static double CalculateQuarterlyVariance(this IEnumerable<double> list)
@@ -126,7 +139,7 @@ namespace PracaInzynierska.Statystyka
 
         private static double _calculateMedian(List<double> list)
         {
-            if (list.Count == 0) throw new Exception("The list does not contain items");
+            if (list.Count == 0) throw new EmptyListException();
 
             list.Sort();
 
@@ -158,7 +171,7 @@ namespace PracaInzynierska.Statystyka
         }
         private static double _calculateSkewness(List<double> list,int type=3)
         {
-            if (list.Count == 0) throw new Exception("The list does not contain items");
+            if (list.Count == 0) throw new EmptyListException();
 
             double m3 = 0;
             double m2 = 0;
@@ -183,7 +196,7 @@ namespace PracaInzynierska.Statystyka
                         *Math.Sqrt((1 - 1.0 / n)* (1 - 1.0 / n)* (1 - 1.0 / n));
                     break;
                 default:
-                    throw new Exception("Invalid 'type' argument.");
+                    throw new InvalidArgument("type");
             }
 
             return Math.Round(A,7);
@@ -205,14 +218,14 @@ namespace PracaInzynierska.Statystyka
         //TODO: histogram, dominanta/moda/modalna, kurtoza
         public static List<double> _calculateMode(List<double> list)
         {
-            if (list.Count == 0) throw new Exception("The list does not contain items");
+            if (list.Count == 0) throw new EmptyListException();
 
             List<double> currentMax = new List<double>();
 
             Dictionary<double, int> dictNumberOfOccurrencesOfElements = list.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
 
             if (!((dictNumberOfOccurrencesOfElements.Values.GroupBy(x => x).Where(x => x.Count() >= 1))
-                .Count() > 1)) throw new Exception("There is no dominant feature in a given set");
+                .Count() > 1)) throw new Exception("There is no dominant in a given set");
             
             int occurences = 0;
 
@@ -305,7 +318,7 @@ namespace PracaInzynierska.Statystyka
             //https://www.youtube.com/watch?v=QoV_TL0IDGA
             //wyjaśnienia: http://trendingsideways.com/index.php/the-p-value-formula-testing-your-hypothesis/  
 
-            if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
+            if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
             //int n = Math.Min(list1.Count(), list2.Count()); 
             int n = list1.Count(); //Czy nie wystarczy czegoś takiego? bo zakładamy że oni równe 
             double average1 = CalculateMean(list1);
@@ -515,9 +528,9 @@ namespace PracaInzynierska.Statystyka
             public double PValue;
             public double DegreesOfFreedom;
         }
-        public static Test CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<double> list)
+        private static Test _calculateKolmogorovSmirnovTestForNormality(List<double> list)
         {
-            list = list.OrderBy(x => x);
+            list.OrderBy(x => x);
             int n = list.Count();
             List<double> Di = new List<double>();
             List<double> D_i = new List<double>();
@@ -549,6 +562,18 @@ namespace PracaInzynierska.Statystyka
                 PValue= Math.Round(p, 4)
             }; 
         }
+        public static Test CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<double> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add(item);
+            return _calculateKolmogorovSmirnovTestForNormality(copy);
+        }
+        public static Test CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<int> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return _calculateKolmogorovSmirnovTestForNormality(copy);
+        }
         private static double poly(double[] cc, int nord, double x)
         {
             /* Algorithm AS 181.2    Appl. Statist.    (1982) Vol. 31, No. 2
@@ -578,7 +603,7 @@ namespace PracaInzynierska.Statystyka
 
         public static Test CalculateShapiroWilkTestForNormality(this IEnumerable<double> list)
         {
-            if (list.Count()<3 || list.Count()>5000) throw new Exception("Kolekcja, dla której liczony jest współczynnik korelacji jest za mała lubza duża");
+            if (list.Count() < 3 || list.Count() > 5000) throw new NotTheRightSizeException();
             list = list.OrderBy(x => x);
             int n = list.Count();
             int nn2 = n / 2;
@@ -754,9 +779,9 @@ namespace PracaInzynierska.Statystyka
             };
         }
         //https://stats.stackexchange.com/questions/381873/meaning-of-chi-squared-in-r-kruskal-wallis-test
-        public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1,IEnumerable<double> list2)
+        private static Test _calculateKruskalaWalisaTest(List<double> list1,List<double> list2)
         {
-            if (list1.Count() != list2.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
+            if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
 
             List<double> factorList = list2.Distinct().ToList();
 
@@ -800,7 +825,7 @@ namespace PracaInzynierska.Statystyka
             kwScore =kwScore/ correctionForTied;
             kwScore =Math.Round(kwScore,1);
             int df = factorList.Count() - 1;
-            double pVal = 1.0- ContinuousDistribution.chisquareCdf(kwScore,df);
+            double pVal = 1.0- ContinuousDistribution.ChisquareCdf(kwScore,df);
             return new Test
             {
                 TestValue = kwScore,
@@ -809,6 +834,22 @@ namespace PracaInzynierska.Statystyka
             };
         }
 
+        public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculateKruskalaWalisaTest(copy1,copy2);
+        }
+        public static Test CalculateKruskalaWalisaTest(this IEnumerable<int> list1, IEnumerable<int> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (int item in list1) copy1.Add((double)item);
+            foreach (int item in list2) copy2.Add((double)item);
+            return _calculateKruskalaWalisaTest(copy1, copy2);
+        }
         public struct FTest
         {
             public double RatioOfVariances;
@@ -839,7 +880,7 @@ namespace PracaInzynierska.Statystyka
 
         //https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/8-chi-squared-tests
 
-        public static Test CalculateChiSquaredTest(this IEnumerable<double> list)
+        private static Test _calculateChiSquaredTest(List<double> list)
         {
             double sumN = 0;
 
@@ -857,7 +898,7 @@ namespace PracaInzynierska.Statystyka
                 statistic += ((list.ElementAt(i) - expectedA) * (list.ElementAt(i) - expectedA)) / expectedA;
             }
             int df = n - 1;
-            double pval = 1.0 - ContinuousDistribution.chisquareCdf(statistic, df);
+            double pval = 1.0 - ContinuousDistribution.ChisquareCdf(statistic, df);
 
             return new Test
             {
@@ -866,13 +907,13 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(pval, 4)
             };
         }
-        public static Test CalculateChiSquaredTest(params IEnumerable<double>[] args)
+        private static Test _calculateChiSquaredTest(params List<double>[] args)
         {
             int nCols = args.Length;
             int nRows = args.FirstOrDefault().Count();
-            foreach (IEnumerable<double> list in args)
+            foreach (List<double> list in args)
             {
-                if (nRows != list.Count()) throw new Exception("Kolekcje, dla których liczony jest współczynnik korelacji nie są równoliczne");
+                if (nRows != list.Count()) throw new NotTheSameLengthException();
             }
             List<double> n = Enumerable.Repeat<double>(0, nRows).ToList();
 
@@ -900,7 +941,7 @@ namespace PracaInzynierska.Statystyka
                 rowNum++;
             }
             int df = (nCols - 1) * (nRows - 1);
-            double pval = 1.0 - ContinuousDistribution.chisquareCdf(statistic, df);
+            double pval = 1.0 - ContinuousDistribution.ChisquareCdf(statistic, df);
             return new Test
             {
                 TestValue = Math.Round(statistic, 5),
@@ -908,7 +949,69 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(pval, 4)
             };
         }
-
+        public static Test CalculateChiSquaredTest(params IEnumerable<double>[] args)
+        {
+            if (args.Length == 1)
+            {
+                List<double> copy = new List<double>();
+                foreach(IEnumerable<double> item in args)
+                {
+                    foreach (double element in item)
+                        copy.Add(element);
+                }
+                return _calculateChiSquaredTest(copy);
+            }
+            else
+            {
+                List<double>[] copy = new List<double>[args.Length];
+                for(int i=0; i<args.Length;i++)
+                {
+                    copy[i] = new List<double>();
+                }
+                int j = 0;
+                foreach (IEnumerable<double> list in args)
+                {
+                    foreach(double element in list)
+                    {
+                        copy[j].Add(element);
+                    }
+                    j++;
+                }
+                return _calculateChiSquaredTest(copy);
+            }
+            
+        }
+        public static Test CalculateChiSquaredTest(params IEnumerable<int>[] args)
+        {
+            if (args.Length == 1)
+            {
+                List<double> copy = new List<double>();
+                foreach (IEnumerable<int> item in args)
+                {
+                    foreach (int element in item)
+                        copy.Add((double)element);
+                }
+                return _calculateChiSquaredTest(copy);
+            }
+            else
+            {
+                List<double>[] copy = new List<double>[args.Length];
+                for (int i = 0; i < args.Length; i++)
+                {
+                    copy[i] = new List<double>();
+                }
+                int j = 0;
+                foreach (IEnumerable<int> list in args)
+                {
+                    foreach (int element in list)
+                    {
+                        copy[j].Add((double)element);
+                    }
+                    j++;
+                }
+                return _calculateChiSquaredTest(copy);
+            }
+        }
         public static Test CalculateSpearmanCorrelation(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             int n = list1.Count();

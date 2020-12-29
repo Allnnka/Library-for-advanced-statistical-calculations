@@ -1,9 +1,5 @@
 ﻿using PracaInzynierska.Statystyka;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PracaInzynierska
 {
@@ -31,7 +27,7 @@ namespace PracaInzynierska
             double[] db = {3.5,5.7,2.9,2.4,9.9,3.3,16.7,6.0,3.8,4,9.1,20.9 };
 
             double q1 = 0, q2 = 0, q3 = 0;
-            Statystyki.CalculateQuartile(mem, out q1,out q2,out q3);
+            double chi_sqrt= Statystyki.CalculateChiSquaredTest(tablicaDouble1,tablicaDouble3).TestValue;
            // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
 
             Console.WriteLine("q1 " + q1);

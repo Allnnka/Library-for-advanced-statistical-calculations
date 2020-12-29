@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using PracaInzynierska;
 using PracaInzynierska.Statystyka;
 
 
@@ -11,6 +11,7 @@ namespace TestAnalizaWyników
     [TestClass]
     public class TestStatystyka
     {
+        readonly double[] emptyTable = { };
         readonly double[] tableDouble1 = { 1, 2, 3, 4, 5 };
         readonly double[] tableDouble2 = { 1, 2, 3, 4 };
         readonly double[] tableDouble3 = { 1, 1, 1, 2, 2 };
@@ -21,8 +22,38 @@ namespace TestAnalizaWyników
         readonly int[] tableInt3 = { 1, 1, 1, 2, 2 };
         readonly int[] tableInt4 = { 1, 1, 1, 2 };
 
+
         [TestMethod]
-        public void TestObliczMedianęDouble()
+        public void TestCalculateMeanDouble()
+        {
+            double mean1 = Statystyki.CalculateMean(tableDouble1);
+            double mean2 = Statystyki.CalculateMean(tableDouble2);
+            double mean3 = Statystyki.CalculateMean(tableDouble3);
+            double mean4 = Statystyki.CalculateMean(tableDouble4);
+
+            Assert.AreEqual(3, mean1);
+            Assert.AreEqual(2.5, mean2);
+            Assert.AreEqual(1.4, mean3);
+            Assert.AreEqual(1.25, mean4);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMean(emptyTable));
+        }
+        [TestMethod]
+        public void TestCalculateMeanInt()
+        {
+            double mean1 = Statystyki.CalculateMean(tableInt1);
+            double mean2 = Statystyki.CalculateMean(tableInt2);
+            double mean3 = Statystyki.CalculateMean(tableInt3);
+            double mean4 = Statystyki.CalculateMean(tableInt4);
+
+            Assert.AreEqual(3, mean1);
+            Assert.AreEqual(2.5, mean2);
+            Assert.AreEqual(1.4, mean3);
+            Assert.AreEqual(1.25, mean4);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMean(emptyTable));
+
+        }
+        [TestMethod]
+        public void TestCalculateMedianDouble()
         {
             double median1 = Statystyki.CalculateMedian(tableDouble1);
             double median2 = Statystyki.CalculateMedian(tableDouble2);
@@ -33,10 +64,12 @@ namespace TestAnalizaWyników
             Assert.AreEqual(2.5, median2);
             Assert.AreEqual(1, median3);
             Assert.AreEqual(1, median4);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMedian(emptyTable));
+
         }
 
         [TestMethod]
-        public void TestObliczMedianęInt()
+        public void TestCalculateMedianInt()
         {
             double median1 = Statystyki.CalculateMedian(tableInt1);
             double median2 = Statystyki.CalculateMedian(tableInt2);
@@ -47,10 +80,40 @@ namespace TestAnalizaWyników
             Assert.AreEqual(2.5, median2);
             Assert.AreEqual(1, median3);
             Assert.AreEqual(1, median4);
-        }
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMedian(emptyTable));
 
+        }
         [TestMethod]
-        public void TestCalculateStandardDeviationPróbkiDouble()
+        public void TestCalculateQuartile()
+        {
+            double q11 = Statystyki.CalculateQuartile(tableDouble1).q1;
+            double q13 = Statystyki.CalculateQuartile(tableDouble1).q3;
+
+            double q21 = Statystyki.CalculateQuartile(tableDouble2).q1;
+            double q23 = Statystyki.CalculateQuartile(tableDouble2).q3;
+
+            double q31 = Statystyki.CalculateQuartile(tableDouble3).q1;
+            double q33 = Statystyki.CalculateQuartile(tableDouble3).q3;
+
+            double q41 = Statystyki.CalculateQuartile(tableDouble4).q1;
+            double q43 = Statystyki.CalculateQuartile(tableDouble4).q3;
+
+            Assert.AreEqual(2, q11);
+            Assert.AreEqual(4, q13);
+
+            Assert.AreEqual(1.5, q21);
+            Assert.AreEqual(3.5, q23);
+
+            Assert.AreEqual(1, q31);
+            Assert.AreEqual(2, q33);
+
+            Assert.AreEqual(1, q41);
+            Assert.AreEqual(1.5, q43);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateQuartile(emptyTable).q1);
+
+        }
+        [TestMethod]
+        public void TestCalculateStandardDeviationSamplesDouble()
         {
             double standardDeviation1 = Statystyki.CalculateStandardDeviation(tableDouble1, Statystyki.StandardDeviationType.Samples);
             double standardDeviation2 = Statystyki.CalculateStandardDeviation(tableDouble2, Statystyki.StandardDeviationType.Samples);
@@ -66,7 +129,7 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void TestCalculateStandardDeviationPopulacjiDouble()
+        public void TestCalculateStandardDeviationPopulationDouble()
         {
             double standardDeviation1 = Statystyki.CalculateStandardDeviation(tableDouble1, Statystyki.StandardDeviationType.Population);
             double standardDeviation2 = Statystyki.CalculateStandardDeviation(tableDouble2, Statystyki.StandardDeviationType.Population);
@@ -82,7 +145,7 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void TestCalculateStandardDeviationPopulacjiInt()
+        public void TestCalculateStandardDeviationPopulationInt()
         {
             double standardDeviation1 = Statystyki.CalculateStandardDeviation(tableInt1, Statystyki.StandardDeviationType.Population);
             double standardDeviation2 = Statystyki.CalculateStandardDeviation(tableInt2, Statystyki.StandardDeviationType.Population);
@@ -98,7 +161,7 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void TestObliczDominante()
+        public void TestCalculateModeDouble()
         {
             List<double> moda3 = Statystyki.CalculateMode(tableDouble3);
             List<double> moda4 = Statystyki.CalculateMode(tableDouble4);
@@ -108,6 +171,24 @@ namespace TestAnalizaWyników
             Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableDouble2));
             CollectionAssert.AreEqual(new List<double>() {1}, moda3);
             CollectionAssert.AreEqual(new List<double>() {1}, moda4);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMode(emptyTable));
+
+
+        }
+        [TestMethod]
+        public void TestCalculateModeInt()
+        {
+            List<double> moda3 = Statystyki.CalculateMode(tableInt3);
+            List<double> moda4 = Statystyki.CalculateMode(tableInt4);
+
+
+            Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableInt1));
+            Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableInt2));
+            CollectionAssert.AreEqual(new List<double>() { 1 }, moda3);
+            CollectionAssert.AreEqual(new List<double>() { 1 }, moda4);
+
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMode(emptyTable));
+
 
         }
         [TestMethod]
@@ -499,7 +580,7 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void ChiSquaredTest()
+        public void ChiSquaredTestDouble()
         {
             double x1= Statystyki.CalculateChiSquaredTest(tableDouble1).TestValue;
             double x1pVal = Statystyki.CalculateChiSquaredTest(tableDouble1).PValue;
@@ -534,7 +615,42 @@ namespace TestAnalizaWyników
             Assert.AreEqual(x242Df, 6);
 
         }
+        [TestMethod]
+        public void ChiSquaredTestInt()
+        {
+            double x1 = Statystyki.CalculateChiSquaredTest(tableInt1).TestValue;
+            double x1pVal = Statystyki.CalculateChiSquaredTest(tableInt1).PValue;
+            double x1Df = Statystyki.CalculateChiSquaredTest(tableInt1).DegreesOfFreedom;
 
+            Assert.AreEqual(x1, 3.33333);
+            Assert.AreEqual(x1Df, 4);
+            Assert.AreEqual(x1pVal, 0.5037);
+
+            double x13 = Statystyki.CalculateChiSquaredTest(tableInt1, tableInt3).TestValue;
+            double x13pval = Statystyki.CalculateChiSquaredTest(tableInt1, tableInt3).PValue;
+            double x13Df = Statystyki.CalculateChiSquaredTest(tableInt1, tableInt3).DegreesOfFreedom;
+
+            Assert.AreEqual(x13, 0.43401);
+            Assert.AreEqual(x13pval, 0.9796);
+            Assert.AreEqual(x13Df, 4);
+
+            double x24 = Statystyki.CalculateChiSquaredTest(tableInt2, tableInt4).TestValue;
+            double x24pval = Statystyki.CalculateChiSquaredTest(tableInt2, tableInt4).PValue;
+            double x24Df = Statystyki.CalculateChiSquaredTest(tableInt2, tableInt4).DegreesOfFreedom;
+
+            Assert.AreEqual(x24, 0.375);
+            Assert.AreEqual(x24pval, 0.9454);
+            Assert.AreEqual(x24Df, 3);
+
+            double x242 = Statystyki.CalculateChiSquaredTest(tableInt2, tableInt4, tableInt2).TestValue;
+            double x242pval = Statystyki.CalculateChiSquaredTest(tableInt2, tableInt4, tableInt2).PValue;
+            double x242Df = Statystyki.CalculateChiSquaredTest(tableInt2, tableInt4, tableInt2).DegreesOfFreedom;
+
+            Assert.AreEqual(x242, 0.47619);
+            Assert.AreEqual(x242pval, 0.9981);
+            Assert.AreEqual(x242Df, 6);
+
+        }
         [TestMethod]
         public void SpearmanCorrelationTest()
         {

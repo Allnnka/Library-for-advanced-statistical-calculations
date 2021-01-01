@@ -215,6 +215,30 @@ namespace TestAnalizaWyników
             Assert.AreEqual(skewness4, 0.75, 3);
 
         }
+        [TestMethod]
+        public void TestCalculateSkewnessInt()
+        {
+            double skewness1 = Statystyki.CalculateSkewness(tableInt1);
+            double skewness2 = Statystyki.CalculateSkewness(tableInt2);
+            double skewness3 = Statystyki.CalculateSkewness(tableInt3);
+            double skewness4 = Statystyki.CalculateSkewness(tableInt4);
+
+            Assert.AreEqual(skewness1, 0, 1);
+            Assert.AreEqual(skewness2, 0, 1);
+            Assert.AreEqual(skewness3, 0.6085806, 1);
+            Assert.AreEqual(skewness4, 2, 2);
+
+            Assert.AreEqual(skewness1, 0, 2);
+            Assert.AreEqual(skewness2, 0, 2);
+            Assert.AreEqual(skewness3, 0.4082483, 2);
+            Assert.AreEqual(skewness4, 1.154701, 2);
+
+            Assert.AreEqual(skewness1, 0, 3);
+            Assert.AreEqual(skewness2, 0, 3);
+            Assert.AreEqual(skewness3, 0.2921187, 3);
+            Assert.AreEqual(skewness4, 0.75, 3);
+
+        }
 
         [TestMethod]
         public void TestCalculateKurtosisDouble()
@@ -425,12 +449,12 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void TestUMannaWhitneya()
+        public void TestUMannaWhitneyaDouble()
         {
             //in RStudio to samo co wilcox.test(d1,d4)
 
-            double w13 = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3).T;
-            double w13PValue = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3).PValue;
+            double w13 = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble3).T;
+            double w13PValue = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble3).PValue;
             Assert.AreEqual(20.5, w13);
             Assert.AreEqual(0.1015, w13PValue);
 
@@ -446,9 +470,37 @@ namespace TestAnalizaWyników
 
             Assert.AreEqual(8.5, w43);
             Assert.AreEqual(0.7656, w43PValue);
+
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateTestUMannaWhitneya(emptyTable,emptyTable));
+
         }
         [TestMethod]
-        public void TestKolmogorovSmirnovTests()
+        public void TestUMannaWhitneyaInt()
+        {
+            //in RStudio to samo co wilcox.test(d1,d4)
+
+            double w13 = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt3).T;
+            double w13PValue = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt3).PValue;
+            Assert.AreEqual(20.5, w13);
+            Assert.AreEqual(0.1015, w13PValue);
+
+
+            double w14 = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt4).T;
+            double w14PValue = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt4).PValue;
+
+            Assert.AreEqual(17, w14);
+            Assert.AreEqual(0.0948, w14PValue);
+
+            double w43 = Statystyki.CalculateTestUMannaWhitneya(tableInt4, tableInt3).T;
+            double w43PValue = Statystyki.CalculateTestUMannaWhitneya(tableInt4, tableInt3).PValue;
+
+            Assert.AreEqual(8.5, w43);
+            Assert.AreEqual(0.7656, w43PValue);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateTestUMannaWhitneya(emptyTable, emptyTable));
+
+        }
+        [TestMethod]
+        public void TestKolmogorovSmirnovTestDouble()
         {
             double d1 = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableDouble1).TestValue;
             double d1PVal = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableDouble1).PValue;
@@ -464,10 +516,10 @@ namespace TestAnalizaWyników
 
             //ks.test(d1, "pnorm", mean=mean(d1), sd=sd(d1))
             Assert.AreEqual(0.13646, d1);
-            //Assert.AreEqual(0.9998, d1PVal);
+            Assert.AreEqual(1, d1PVal);
 
             Assert.AreEqual(0.15073, d2);
-           // Assert.AreEqual(0.9998, d2PVal);
+            Assert.AreEqual(1, d2PVal);
 
             Assert.AreEqual(0.3674, d3);
             Assert.AreEqual(0.5096, d3PVal);
@@ -476,7 +528,35 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.4167, d4PVal);
 
         }
+        [TestMethod]
+        public void TestKolmogorovSmirnovTestInt()
+        {
+            double d1 = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt1).TestValue;
+            double d1PVal = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt1).PValue;
 
+            double d2 = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt2).TestValue;
+            double d2PVal = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt2).PValue;
+
+            double d3 = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt3).TestValue;
+            double d3PVal = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt3).PValue;
+
+            double d4 = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt4).TestValue;
+            double d4PVal = Statystyki.CalculateKolmogorovSmirnovTestForNormality(tableInt4).PValue;
+
+            //ks.test(d1, "pnorm", mean=mean(d1), sd=sd(d1))
+            Assert.AreEqual(0.13646, d1);
+            Assert.AreEqual(1, d1PVal);
+
+            Assert.AreEqual(0.15073, d2);
+            Assert.AreEqual(1, d2PVal);
+
+            Assert.AreEqual(0.3674, d3);
+            Assert.AreEqual(0.5096, d3PVal);
+
+            Assert.AreEqual(0.44146, d4);
+            Assert.AreEqual(0.4167, d4PVal);
+
+        }
         [TestMethod]
         public void TestShapiroWilkTest()
         {
@@ -509,7 +589,7 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void TestKruskalaWalisaTest()
+        public void TestKruskalaWalisaTestDouble()
         {
             double ch13 = Statystyki.CalculateKruskalaWalisaTest(tableDouble1, tableDouble3).TestValue;
             double ch13PVal = Statystyki.CalculateKruskalaWalisaTest(tableDouble1, tableDouble3).PValue;
@@ -543,7 +623,41 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.3916, ch42PVal);
             Assert.AreEqual(3, ch42Df);
         }
+        [TestMethod]
+        public void TestKruskalaWalisaTestInt()
+        {
+            double ch13 = Statystyki.CalculateKruskalaWalisaTest(tableInt1, tableInt3).TestValue;
+            double ch13PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt1, tableInt3).PValue;
+            double ch13Df = Statystyki.CalculateKruskalaWalisaTest(tableInt1, tableInt3).DegreesOfFreedom;
 
+            double ch31 = Statystyki.CalculateKruskalaWalisaTest(tableInt3, tableInt1).TestValue;
+            double ch31PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt3, tableInt1).PValue;
+            double ch31Df = Statystyki.CalculateKruskalaWalisaTest(tableInt3, tableInt1).DegreesOfFreedom;
+
+            double ch24 = Statystyki.CalculateKruskalaWalisaTest(tableInt2, tableInt4).TestValue;
+            double ch24PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt2, tableInt4).PValue;
+            double ch24Df = Statystyki.CalculateKruskalaWalisaTest(tableInt2, tableInt4).DegreesOfFreedom;
+
+            double ch42 = Statystyki.CalculateKruskalaWalisaTest(tableInt4, tableInt2).TestValue;
+            double ch42PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt4, tableInt2).PValue;
+            double ch42Df = Statystyki.CalculateKruskalaWalisaTest(tableInt4, tableInt2).DegreesOfFreedom;
+
+            Assert.AreEqual(3, ch13);
+            Assert.AreEqual(0.0833, ch13PVal);
+            Assert.AreEqual(1, ch13Df);
+
+            Assert.AreEqual(4, ch31);
+            Assert.AreEqual(0.406, ch31PVal);
+            Assert.AreEqual(4, ch31Df);
+
+            Assert.AreEqual(1.8, ch24);
+            Assert.AreEqual(0.1797, ch24PVal);
+            Assert.AreEqual(1, ch24Df);
+
+            Assert.AreEqual(3, ch42);
+            Assert.AreEqual(0.3916, ch42PVal);
+            Assert.AreEqual(3, ch42Df);
+        }
         [TestMethod]
         public void FTestToCompareTwoVariances()
         {

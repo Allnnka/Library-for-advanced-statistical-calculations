@@ -1,5 +1,7 @@
 ﻿using PracaInzynierska.Statystyka;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PracaInzynierska
 {
@@ -26,6 +28,8 @@ namespace PracaInzynierska
             double[] da = {2,3.6,2.6,2.6,7.3,3.4,14.9,6.6,2.3,2,6.8,8.5 };
             double[] db = {3.5,5.7,2.9,2.4,9.9,3.3,16.7,6.0,3.8,4,9.1,20.9 };
 
+            List<double> list = new List<double>{ 1, 1, 1, 2, 2 };
+
             double q1 = 0, q2 = 0, q3 = 0;
             double chi_sqrt= Statystyki.CalculateChiSquaredTest(tablicaDouble1,tablicaDouble3).TestValue;
            // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
@@ -33,7 +37,9 @@ namespace PracaInzynierska
             Console.WriteLine("q1 " + q1);
             Console.WriteLine("q2 " + q2);
 
-            Console.WriteLine("q3 " + q3);
+            list.Distinct().ToList();
+            foreach(var e in list)
+                Console.WriteLine(e);
 
             //Console.WriteLine("pval " + pval);
             //Console.WriteLine("Max " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfPositiveRanks);

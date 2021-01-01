@@ -76,16 +76,16 @@ namespace PracaInzynierska.Statystyka
 
         public static double CalculateStandardDeviation(this IEnumerable<float> list, StandardDeviationType type = StandardDeviationType.Population)
         {
-            List<double> kopia = new List<double>();
-            foreach (float wartość in list) kopia.Add((double)wartość);
-            return CalculateStandardDeviation(kopia, type);
+            List<double> copy = new List<double>();
+            foreach (float item in list) copy.Add((double)item);
+            return CalculateStandardDeviation(copy, type);
         }
 
         public static double CalculateStandardDeviation(this IEnumerable<int> list, StandardDeviationType type = StandardDeviationType.Population)
         {
-            List<double> kopia = new List<double>();
-            foreach (int wartość in list) kopia.Add((double)wartość);
-            return CalculateStandardDeviation(kopia, type);
+            List<double> copy = new List<double>();
+            foreach (int item in list) copy.Add((double)item);
+            return CalculateStandardDeviation(copy, type);
         }
         public struct Quartile
         {
@@ -269,6 +269,7 @@ namespace PracaInzynierska.Statystyka
 
         private static double _calculateKurtosis(List<double> list)
         {
+            if (list.Count() == 0) throw new EmptyListException();
             int n = list.Count();
             double mean = CalculateMean(list);
             double m2 = 0;
@@ -488,8 +489,9 @@ namespace PracaInzynierska.Statystyka
           
         }
 
-        public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<double> list1, IEnumerable<double> list2)
+        private static WilcoxonTest _calculateTestUMannaWhitneya(List<double> list1, List<double> list2)
         {
+            if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyListException();
             int n1 = list1.Count();
             int n2 = list2.Count();
             List<double> list3 = list1.Concat(list2).OrderBy(x => Math.Abs(x)).ToList();
@@ -514,6 +516,7 @@ namespace PracaInzynierska.Statystyka
             double zValue = (Math.Abs(u2 - (n1 * n2) / 2.0)-0.5)/Math.Sqrt((n1*n2*(n1+n2+1.0))/12.0-correctionForTied);
             double p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
+          
             return new WilcoxonTest
             {
                 T = u2,
@@ -522,6 +525,22 @@ namespace PracaInzynierska.Statystyka
             };
         }
 
+        public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculateTestUMannaWhitneya(copy1, copy2);
+        }
+        public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<int> list1, IEnumerable<int> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add((double)item);
+            foreach (double item in list2) copy2.Add((double)item);
+            return _calculateTestUMannaWhitneya(copy1, copy2);
+        }
         public struct Test
         {
             public double TestValue;
@@ -530,12 +549,13 @@ namespace PracaInzynierska.Statystyka
         }
         private static Test _calculateKolmogorovSmirnovTestForNormality(List<double> list)
         {
+            if (list.Count() == 0) throw new EmptyListException();
             list.OrderBy(x => x);
             int n = list.Count();
             List<double> Di = new List<double>();
             List<double> D_i = new List<double>();
-           
-            double average = CalculateMean(list);
+
+            double average = list.Average();
             double standartDeviation = CalculateStandardDeviation(list);
 
 
@@ -545,12 +565,11 @@ namespace PracaInzynierska.Statystyka
                 D_i.Add(Math.Abs(Util.Phi((list.ElementAt(i) - average) / standartDeviation) - ((double)i / (double)n)));
             }
             double d = (Math.Max(Di.Max(), D_i.Max()));
-            double z = d * Math.Sqrt((double)n);
 
             //P- value from 
             //https://stats.stackexchange.com/questions/389034/kolmogorov-smirnov-test-calculating-the-p-value-manually
             double pValue = 0;
-            double zz = z * z;
+            double zz = d*d*(double)n;
             for (int i =1; i < 1000; i++)
             {
                 pValue += (Math.Pow((-1.0), ((double)i - 1.0))) * (Math.Exp((-2.0) * ((double)i * (double)i) * zz));
@@ -601,10 +620,10 @@ namespace PracaInzynierska.Statystyka
             return (x > 0) ? 1 : -1;
         }
 
-        public static Test CalculateShapiroWilkTestForNormality(this IEnumerable<double> list)
+        private static Test _calculateShapiroWilkTestForNormality(List<double> list)
         {
             if (list.Count() < 3 || list.Count() > 5000) throw new NotTheRightSizeException();
-            list = list.OrderBy(x => x);
+            list.OrderBy(x => x);
             int n = list.Count();
             int nn2 = n / 2;
             double[] a = new double[nn2 + 1]; /* 1-based */
@@ -778,14 +797,25 @@ namespace PracaInzynierska.Statystyka
                 PValue =pValue
             };
         }
+        public static Test CalculateShapiroWilkTestForNormality(this IEnumerable<double> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (float item in list) copy.Add(item);
+            return _calculateShapiroWilkTestForNormality(copy);
+        }
+        public static Test CalculateShapiroWilkTestForNormality(this IEnumerable<int> list)
+        {
+            List<double> copy = new List<double>();
+            foreach (float item in list) copy.Add((double)item);
+            return _calculateShapiroWilkTestForNormality(copy);
+        }
         //https://stats.stackexchange.com/questions/381873/meaning-of-chi-squared-in-r-kruskal-wallis-test
         private static Test _calculateKruskalaWalisaTest(List<double> list1,List<double> list2)
         {
             if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
-
+            if (list1.Count() ==0 || list2.Count()==0) throw new EmptyListException();
             List<double> factorList = list2.Distinct().ToList();
 
-            List<double> list = list1.Concat(list2).ToList();
             int n = list1.Count();
             list1 = list1.OrderBy(x => Math.Abs(x)).ToList();
 

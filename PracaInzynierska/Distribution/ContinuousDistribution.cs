@@ -8,9 +8,6 @@ namespace PracaInzynierska.Distribution
 {
     public static class ContinuousDistribution
     {
-        //https://jamesmccaffrey.wordpress.com/2016/04/27/implementing-the-students-t-distribution-density-function-in-code/
-        //Dla obliczania p value 
-
         public static double Gauss(double z)
         {
             // input = z-value (-inf to +inf)
@@ -19,7 +16,7 @@ namespace PracaInzynierska.Distribution
             // ACM Algorithm #209
             double y; // 209 scratch variable
             double p; // result. called 'z' in 209
-            double w; // 209 scratch variable
+            double w; // 209 scratch variable ContinuousDistribution
             if (z == 0.0)
                 p = 0.0;
             else
@@ -143,7 +140,6 @@ namespace PracaInzynierska.Distribution
 
         public static double NormalQuantile(double p, double mu, double sigma)
         {
-            // The inverse of cdf.
             if (sigma < 0)
             {
                 throw new ArgumentException("The sigma parameter must be positive.");

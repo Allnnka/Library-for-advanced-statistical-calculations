@@ -737,7 +737,7 @@ namespace TestAnalizaWyników
 
         }
         [TestMethod]
-        public void TestShapiroWilkTest()
+        public void TestShapiroWilkTestDouble()
         {
             double w1 = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble1).TestValue;
             double w1PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble1).PValue;
@@ -766,7 +766,36 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.62978, w4);
             Assert.AreEqual(0.00124, w4PVal);
         }
+        [TestMethod]
+        public void TestShapiroWilkTestInt()
+        {
+            double w1 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt1).TestValue;
+            double w1PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt1).PValue;
 
+            double w2 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt2).TestValue;
+            double w2PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt2).PValue;
+
+            double w3 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt3).TestValue;
+            double w3PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt3).PValue;
+
+            double w4 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt4).TestValue;
+            double w4PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt4).PValue;
+
+
+            //shapiro.test(d1)
+
+            Assert.AreEqual(0.98676, w1);
+            Assert.AreEqual(0.9672, w1PVal);
+
+            Assert.AreEqual(0.99291, w2);
+            Assert.AreEqual(0.9719, w2PVal);
+
+            Assert.AreEqual(0.68403, w3);
+            Assert.AreEqual(0.00647, w3PVal);
+
+            Assert.AreEqual(0.62978, w4);
+            Assert.AreEqual(0.00124, w4PVal);
+        }
         [TestMethod]
         public void TestKruskalaWalisaTestDouble()
         {

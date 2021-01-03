@@ -241,7 +241,6 @@ namespace PracaInzynierska.Statystyka
             return currentMax;
         }
 
-
         public static List<double> CalculateMode(this IEnumerable<double> list)
         {
             List<double> copy = new List<double>();
@@ -428,7 +427,6 @@ namespace PracaInzynierska.Statystyka
                 PValue= Math.Round(p, 4)
             };
         }
-
         public static Test CalculateStudentsTTest(this IEnumerable<double> list, double hypotheticalMean = 0)
         {
             List<double> copy = new List<double>();
@@ -550,7 +548,6 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(p, 4)
             };
         }
-
         public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list, double hypotheticalMedian = 0)
         {
             List<double> copy = new List<double>();
@@ -680,7 +677,7 @@ namespace PracaInzynierska.Statystyka
             list.OrderBy(x => x);
             int n = list.Count();
             int nn2 = n / 2;
-            double[] a = new double[nn2 + 1]; /* 1-based */
+            double[] a = new double[nn2 + 1];
 
             double small = 1e-19;
 
@@ -688,10 +685,10 @@ namespace PracaInzynierska.Statystyka
             double[] g = { -2.273, 0.459 };
             double[] c1 = { 0.0, 0.221157, -0.147981, -2.07119, 4.434685, -2.706056 };
             double[] c2 = { 0.0, 0.042981, -0.293762, -1.752461, 5.682633, -3.582633 };
-            double[] c3 = { 0.544, -0.39978, 0.025054, -6.714e-4 };
-            double[] c4 = { 1.3822, -0.77857, 0.062767, -0.0020322 };
-            double[] c5 = { -1.5861, -0.31082, -0.083751, 0.0038915 };
-            double[] c6= { -0.4803, -0.082676, 0.0030302 };
+            double[] nsmall = { 0.544, -0.39978, 0.025054, -6.714e-4 };
+            double[] ssmall = { 1.3822, -0.77857, 0.062767, -0.0020322 };
+            double[] nlg = { -1.5861, -0.31082, -0.083751, 0.0038915 };
+            double[] slg= { -0.4803, -0.082676, 0.0030302 };
 
             /* Local variables */
             int i, j, i1;
@@ -705,7 +702,7 @@ namespace PracaInzynierska.Statystyka
 
             if (n == 3)
             {
-                a[1] = 0.70710678;/* = sqrt(1/2) */
+                a[1] = Math.Sqrt(0.5);
             }
             else
             {
@@ -745,10 +742,8 @@ namespace PracaInzynierska.Statystyka
 
             range = list.ElementAt(n - 1) - list.ElementAt(0);
             if (range < small)
-            {
-                //console.log('range is too small!'); 
-                throw new ArgumentException();
-            }
+                throw new NotTheRightSizeException();
+
 
 
             /* Check for correct sort order on range - scaled X */
@@ -795,7 +790,7 @@ namespace PracaInzynierska.Statystyka
                 sax += asa * xsx;
             }
 
-            /* W1 equals (1-W) calculated to avoid excessive rounding error        for W very near 1 (a potential problem in very large samples) */
+            /* W1 equals (1-W) calculated to avoid excessive rounding error for W very near 1 (a potential problem in very large samples) */
 
             ssassx = Math.Sqrt(ssa * ssx);
             w1 = (ssassx - sax) * (ssassx + sax) / (ssa * ssx);
@@ -822,18 +817,16 @@ namespace PracaInzynierska.Statystyka
                 gamma = poly(g, 2, an);
                 if (y >= gamma)
                 {
-                    pw = 1e-99; /* an "obvious" value, was 'small' which was 1e-19f */
-                    //return w; 
-                    pValue= pw;
+                    pValue= 1e-99;
                 }
                 y = -Math.Log(gamma - y);
-                m = poly(c3, 4, an);
-                s = Math.Exp(poly(c4, 4, an));
+                m = poly(nsmall, 4, an);
+                s = Math.Exp(poly(ssmall, 4, an));
             }
             else
             { /* n >= 12 */
-                m = poly(c5, 4, xx);
-                s = Math.Exp(poly(c6, 3, xx));
+                m = poly(nlg, 4, xx);
+                s = Math.Exp(poly(slg, 3, xx));
             }
 
             double z = (y - m) / s;

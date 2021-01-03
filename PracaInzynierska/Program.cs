@@ -1,4 +1,5 @@
-﻿using PracaInzynierska.Statystyka;
+﻿using PracaInzynierska.Distribution;
+using PracaInzynierska.Statystyka;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,15 +32,12 @@ namespace PracaInzynierska
             List<double> list = new List<double>{ 1, 1, 1, 2, 2 };
 
             double q1 = 0, q2 = 0, q3 = 0;
-            double chi_sqrt= Statystyki.CalculateChiSquaredTest(tablicaDouble1,tablicaDouble3).TestValue;
-           // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
+            double chi_sqrt= Statystyki.CalculatePearsonsCorrelationCoefficient(t1,t2).StudentsTValue;
+            // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
 
-            Console.WriteLine("q1 " + q1);
-            Console.WriteLine("q2 " + q2);
-
-            list.Distinct().ToList();
-            foreach(var e in list)
-                Console.WriteLine(e);
+            double ss = (54 * 54 * (1 - 0.6727273 * 0.6727273)) / 0.6727273 * 0.6727273 + 2;
+            double pval = ContinuousDistribution.Student(0.975, 3);
+            Console.WriteLine("pp " + pval);
 
             //Console.WriteLine("pval " + pval);
             //Console.WriteLine("Max " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfPositiveRanks);

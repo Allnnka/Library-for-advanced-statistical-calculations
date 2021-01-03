@@ -269,13 +269,13 @@ namespace TestAnalizaWyników
 
 
         [TestMethod]
-        public void TestPearsonsCorrelationCoefficient()
+        public void TestPearsonsCorrelationCoefficientDouble()
         {
-            double cor1 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble1, tableDouble3).PearsonsCorrelationCoefficient;
-            double cor2 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble2, tableDouble4).PearsonsCorrelationCoefficient;
+            double cor1 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble1, tableDouble3).CorrelationCoefficient;
+            double cor2 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble2, tableDouble4).CorrelationCoefficient;
 
-            double cor1PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble1, tableDouble3).NormalDistributionPValue;
-            double cor2PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble2, tableDouble4).NormalDistributionPValue;
+            double cor1PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble1, tableDouble3).PValue;
+            double cor2PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble2, tableDouble4).PValue;
 
             Assert.AreEqual(0.8660254, cor1);
             Assert.AreEqual(0.7745967, cor2);
@@ -283,7 +283,22 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.05767, cor1PValue);
             Assert.AreEqual(0.2254, cor2PValue);
         }
-       
+
+        [TestMethod]
+        public void TestPearsonsCorrelationCoefficientInt()
+        {
+            double cor1 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt1, tableInt3).CorrelationCoefficient;
+            double cor2 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt2, tableInt4).CorrelationCoefficient;
+
+            double cor1PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt1, tableInt3).PValue;
+            double cor2PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt2, tableInt4).PValue;
+
+            Assert.AreEqual(0.8660254, cor1);
+            Assert.AreEqual(0.7745967, cor2);
+
+            Assert.AreEqual(0.05767, cor1PValue);
+            Assert.AreEqual(0.2254, cor2PValue);
+        }
 
         [TestMethod]
         public void TestCalculateSingleSampleStudentsTTestDouble()
@@ -375,8 +390,9 @@ namespace TestAnalizaWyników
             Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateStudentsTTest(emptyTableInt).TestValue);
 
         }
+
         [TestMethod]
-        public void TestCalculateStudentsTtestForIndependentGroups()
+        public void TestCalculateStudentsTtestForIndependentGroupsDouble()
         {
             double t1t2 = Statystyki.CalculateStudentsTTest(tableDouble1, tableDouble2).TestValue;
             double df12= Statystyki.CalculateStudentsTTest(tableDouble1, tableDouble2).DegreesOfFreedom;
@@ -412,7 +428,42 @@ namespace TestAnalizaWyników
         }
 
         [TestMethod]
-        public void TestCalculateStudentsTtestForDependentGroups()
+        public void TestCalculateStudentsTtestForIndependentGroupsInt()
+        {
+            double t1t2 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt2).TestValue;
+            double df12 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt2).DegreesOfFreedom;
+            double p12 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt2).PValue;
+
+            double t2t3 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt3).TestValue;
+            double df23 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt3).DegreesOfFreedom;
+            double p23 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt3).PValue;
+
+            double t1t3 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt3).TestValue;
+            double df13 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt3).DegreesOfFreedom;
+            double p13 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt3).PValue;
+
+            double t2t4 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt4).TestValue;
+            double df24 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt4).DegreesOfFreedom;
+            double p24 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt4).PValue;
+
+            Assert.AreEqual(0.5222, t1t2);
+            Assert.AreEqual(6.9808, df12);
+            Assert.AreEqual(0.6177, p12);
+
+            Assert.AreEqual(1.5933, t2t3);
+            Assert.AreEqual(3.8661, df23);
+            Assert.AreEqual(0.1888, p23);
+
+            Assert.AreEqual(2.1381, t1t3);
+            Assert.AreEqual(4.9464, df13);
+            Assert.AreEqual(0.0861, p13);
+
+            Assert.AreEqual(1.8058, t2t4);
+            Assert.AreEqual(3.8802, df24);
+            Assert.AreEqual(0.1475, p24);
+        }
+        [TestMethod]
+        public void TestCalculateStudentsTtestForDependentGroupsDouble()
         {
             double t1t3 = Statystyki.CalculateStudentsTTest(tableDouble1, tableDouble3, true).TestValue;
             double df13 = Statystyki.CalculateStudentsTTest(tableDouble1, tableDouble3, true).DegreesOfFreedom;
@@ -431,7 +482,26 @@ namespace TestAnalizaWyników
             Assert.AreEqual(3, df24);
             Assert.AreEqual(0.0796, p24);
         }
+        [TestMethod]
+        public void TestCalculateStudentsTtestForDependentGroupsInt()
+        {
+            double t1t3 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt3, true).TestValue;
+            double df13 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt3, true).DegreesOfFreedom;
+            double p13 = Statystyki.CalculateStudentsTTest(tableInt1, tableInt3, true).PValue;
 
+            double t2t4 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt4, true).TestValue;
+            double df24 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt4, true).DegreesOfFreedom;
+            double p24 = Statystyki.CalculateStudentsTTest(tableInt2, tableInt4, true).PValue;
+
+
+            Assert.AreEqual(3.1379, t1t3);
+            Assert.AreEqual(4, df13);
+            Assert.AreEqual(0.0349, p13);
+
+            Assert.AreEqual(2.6112, t2t4);
+            Assert.AreEqual(3, df24);
+            Assert.AreEqual(0.0796, p24);
+        }
 
         [TestMethod]
         public void TestCalculateWilcoxonTestDouble()
@@ -911,14 +981,37 @@ namespace TestAnalizaWyników
             Assert.AreEqual(x242Df, 6);
 
         }
+
         [TestMethod]
-        public void SpearmanCorrelationTest()
+        public void TestSpearmanCorrelationDouble()
         {
-            double p13 = Statystyki.CalculateSpearmanCorrelation(tableDouble1, tableDouble3).TestValue;
+            double p13 = Statystyki.CalculateSpearmanCorrelation(tableDouble1, tableDouble3).CorrelationCoefficient;
             double p13pVal = Statystyki.CalculateSpearmanCorrelation(tableDouble1, tableDouble3).PValue;
 
-            //Assert.AreEqual(p13, 0.866025);
-            //Assert.AreEqual(p13pVal, 0.05767);
+            Assert.AreEqual(p13, 0.866025);
+            Assert.AreEqual(p13pVal, 0.05767);
+
+            double p24 = Statystyki.CalculateSpearmanCorrelation(tableDouble2, tableDouble4).CorrelationCoefficient;
+            double p24pVal = Statystyki.CalculateSpearmanCorrelation(tableDouble2, tableDouble4).PValue;
+
+            Assert.AreEqual(p24, 0.774597);
+            Assert.AreEqual(p24pVal, 0.2254);
+
+        }
+
+        [TestMethod]
+        public void TestSpearmanCorrelationInt()
+        {
+            double p13 = Statystyki.CalculateSpearmanCorrelation(tableInt1, tableInt3).CorrelationCoefficient;
+            double p13pVal = Statystyki.CalculateSpearmanCorrelation(tableInt1, tableInt3).PValue;
+            Assert.AreEqual(p13, 0.866025);
+            Assert.AreEqual(p13pVal, 0.05767);
+
+            double p24 = Statystyki.CalculateSpearmanCorrelation(tableInt2, tableInt4).CorrelationCoefficient;
+            double p24pVal = Statystyki.CalculateSpearmanCorrelation(tableInt2, tableInt4).PValue;
+            Assert.AreEqual(p24, 0.774597);
+            Assert.AreEqual(p24pVal, 0.2254);
+
         }
     }
 }

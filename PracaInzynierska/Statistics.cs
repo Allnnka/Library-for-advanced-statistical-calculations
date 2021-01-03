@@ -7,8 +7,6 @@ using static PracaInzynierska.DescriptiveStatistics.Ranks;
 
 namespace PracaInzynierska.Statystyka
 {
-    //TODO: optymalizacja - wszystkie analizy od razu i zapisywanie do struktury
-
     public static class Statystyki
     {
         public static double CalculateMean(this IEnumerable<double> list)
@@ -42,9 +40,9 @@ namespace PracaInzynierska.Statystyka
             return sampleMeans;
         }
 
-        public static double CalculateRange(this IEnumerable<double> list) //range
-        { 
-            return list.Max() - list.Min(); //nieoptymalne, wystarczyłaby jedna pętla zamiast dwóch     
+        public static double CalculateRange(this IEnumerable<double> list)
+        {
+            return list.Max() - list.Min();
         }
 
         public enum StandardDeviationType { Samples, Population };
@@ -57,7 +55,7 @@ namespace PracaInzynierska.Statystyka
             {
                 deviation += (item - mean) * (item - mean);
             }
-            switch(type)
+            switch (type)
             {
                 case StandardDeviationType.Population:
                     if (list.Count() == 0) throw new Exception("Standard deviation calculation error. The collection is empty");
@@ -93,7 +91,6 @@ namespace PracaInzynierska.Statystyka
             public double q2;
             public double q3;
         }
-        //https://en.wikipedia.org/wiki/Quartile, Method2
         public static Quartile CalculateQuartile(this IEnumerable<double> list)
         {
             if (list.Count() == 0) throw new EmptyListException();
@@ -106,12 +103,12 @@ namespace PracaInzynierska.Statystyka
             q2 = CalculateMedian(list);
             if (_list.Count % 2 != 0)
             {
-                for (int i = 0; i < _list.Count / 2+1; ++i) lowerHalf.Add(_list[i]);
+                for (int i = 0; i < _list.Count / 2 + 1; ++i) lowerHalf.Add(_list[i]);
                 for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
             else
             {
-                for (int i = 0; i < _list.Count/2; ++i) lowerHalf.Add(_list[i]);
+                for (int i = 0; i < _list.Count / 2; ++i) lowerHalf.Add(_list[i]);
                 for (int i = _list.Count / 2; i < _list.Count; ++i) upperHalf.Add(_list[i]);
             }
 
@@ -169,7 +166,7 @@ namespace PracaInzynierska.Statystyka
             foreach (long item in list) copy.Add((double)item);
             return _calculateMedian(copy);
         }
-        private static double _calculateSkewness(List<double> list,int type=3)
+        private static double _calculateSkewness(List<double> list, int type = 3)
         {
             if (list.Count == 0) throw new EmptyListException();
 
@@ -177,10 +174,10 @@ namespace PracaInzynierska.Statystyka
             double m2 = 0;
             int n = list.Count();
             double mean = CalculateMean(list);
-            foreach(double item in list)
+            foreach (double item in list)
             {
                 m3 += (item - mean) * (item - mean) * (item - mean);
-                m2 += (item - mean) * (item - mean) ;
+                m2 += (item - mean) * (item - mean);
             }
             double A;
             switch (type)
@@ -189,17 +186,17 @@ namespace PracaInzynierska.Statystyka
                     A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2);
                     break;
                 case 2:
-                    A= (n*Math.Sqrt(n - 1) * m3) / (Math.Sqrt(m2 * m2 * m2)* (n - 2));
+                    A = (n * Math.Sqrt(n - 1) * m3) / (Math.Sqrt(m2 * m2 * m2) * (n - 2));
                     break;
                 case 3:
-                    A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2) 
-                        *Math.Sqrt((1 - 1.0 / n)* (1 - 1.0 / n)* (1 - 1.0 / n));
+                    A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2)
+                        * Math.Sqrt((1 - 1.0 / n) * (1 - 1.0 / n) * (1 - 1.0 / n));
                     break;
                 default:
                     throw new InvalidArgument("type");
             }
 
-            return Math.Round(A,7);
+            return Math.Round(A, 7);
         }
         public static double CalculateSkewness(this IEnumerable<int> list)
         {
@@ -225,18 +222,18 @@ namespace PracaInzynierska.Statystyka
 
             if (!((dictNumberOfOccurrencesOfElements.Values.GroupBy(x => x).Where(x => x.Count() >= 1))
                 .Count() > 1)) throw new Exception("There is no dominant in a given set");
-            
+
             int occurences = 0;
 
-            foreach (KeyValuePair<double,int> x in dictNumberOfOccurrencesOfElements)
+            foreach (KeyValuePair<double, int> x in dictNumberOfOccurrencesOfElements)
             {
-                if (occurences < x.Value)                                                                        
+                if (occurences < x.Value)
                 {
                     currentMax.Clear();
                     currentMax.Add(x.Key);
                     occurences = x.Value;
                 }
-                else if (occurences == x.Value)                              
+                else if (occurences == x.Value)
                 {
                     currentMax.Add(x.Key);
                 }
@@ -300,37 +297,45 @@ namespace PracaInzynierska.Statystyka
             foreach (long item in list) copy.Add((double)item);
             return _calculateKurtosis(copy);
         }
-        public struct LinearCorrelation
+        public struct Correlation
         {
             public int SampleSize;
-            public double PearsonsCorrelationCoefficient;
-            public double NormalDistributionPValue;
+            public double CorrelationCoefficient;
+            public double PValue;
             public double StudentsTValue;
-            public double PValueForStudentTDistribution;//musi być mniejsza od 0.05, żeby odrzucić null hipothesis, czyli brak korelacji -> jest korelacja jeżeli p < 0.05
-
         }
 
-        public static LinearCorrelation CalculatePearsonsCorrelationCoefficient(this IEnumerable<double> list1, IEnumerable<double> list2)
+        public static Correlation CalculatePearsonsCorrelationCoefficient(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
-            //wzór: https://pl.wikipedia.org/wiki/Wsp%C3%B3%C5%82czynnik_korelacji_Pearsona
-            //powinno być dzielenie przez n, ale się znosi
-            //p i t: http://support.minitab.com/en-us/minitab-express/1/help-and-how-to/modeling-statistics/regression/how-to/correlation/methods-and-formulas/
-            //https://www.youtube.com/watch?v=QoV_TL0IDGA
-            //wyjaśnienia: http://trendingsideways.com/index.php/the-p-value-formula-testing-your-hypothesis/  
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculatePearsonsCorrelationCoefficient(copy1, copy2);
+        }
+        public static Correlation CalculatePearsonsCorrelationCoefficient(this IEnumerable<int> list1, IEnumerable<int> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add((double)item);
+            foreach (double item in list2) copy2.Add((double)item);
+            return _calculatePearsonsCorrelationCoefficient(copy1, copy2);
+        }
 
+        private static Correlation _calculatePearsonsCorrelationCoefficient(List<double> list1, List<double> list2)
+        {
             if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
-            //int n = Math.Min(list1.Count(), list2.Count()); 
-            int n = list1.Count(); //Czy nie wystarczy czegoś takiego? bo zakładamy że oni równe 
+            int n = list1.Count();
+            if (n == 0) throw new EmptyListException();
+            if (n < 3) throw new NotTheRightSizeException();
             double average1 = CalculateMean(list1);
             double average2 = CalculateMean(list2);
 
-            //nie korzystam z metody do obliczania odchyleń standardowych, żeby zamiast trzech pętli była tylko jedna
-            //we wszystkich pomijam dzielenie przez liczbę elementów
             double covariance = 0;
             double standardDeviation1 = 0;
             double standardDeviation2 = 0;
 
-          
+
             for (int i = 0; i < n; ++i)
             {
                 double s1 = (list1.ElementAt(i) - average1);
@@ -340,23 +345,23 @@ namespace PracaInzynierska.Statystyka
                 standardDeviation2 += s2 * s2;
             }
 
-           
+
             double degreeOfFreedom = n - 2.0;
 
-            double r = covariance / Math.Sqrt(standardDeviation1* standardDeviation2);
-            double tDistribution = r * Math.Sqrt((n - 2) / (1 - r * r)); ; // Student's t-distribution with degrees of freedom n − 2
+            double r = covariance / Math.Sqrt(standardDeviation1 * standardDeviation2);
+            if (r >= 1 || r <= -1) throw new ArgumentException("Pearson correlation coefficient mus be in <-1;1>");
+            double tDistribution = r * Math.Sqrt((n - 2) / (1 - r * r));
             double p = ContinuousDistribution.Student(tDistribution, n-2);
 
 
             double tValue = (average1-average2) / Math.Sqrt(standardDeviation1 * standardDeviation1 + standardDeviation2 * standardDeviation2);
             double pForT = ContinuousDistribution.Student(tValue, degreeOfFreedom);
-            return new LinearCorrelation()
+            return new Correlation()
             {
                 SampleSize = n,
-                PearsonsCorrelationCoefficient = Math.Round(r,7),
-                NormalDistributionPValue = Math.Round(p,5),
-                StudentsTValue= tDistribution,
-                PValueForStudentTDistribution= pForT
+                CorrelationCoefficient = Math.Round(r,7),
+                PValue = Math.Round(p,5),
+                StudentsTValue= tDistribution
             };
         }
         
@@ -976,16 +981,12 @@ namespace PracaInzynierska.Statystyka
 
         private static Test _calculateChiSquaredTest(List<double> list)
         {
-            double sumN = 0;
-
+            
             int n = list.Count();
+            if (n == 0) throw new EmptyListException();
             double statistic = 0;
-            for (int i = 0; i < n; i++)
-            {
-                sumN += list.ElementAt(i);
-            }
 
-            double expectedA = sumN / n;
+            double expectedA = list.Average();    
 
             for (int i = 0; i < n; i++)
             {
@@ -1106,27 +1107,63 @@ namespace PracaInzynierska.Statystyka
                 return _calculateChiSquaredTest(copy);
             }
         }
-        public static Test CalculateSpearmanCorrelation(this IEnumerable<double> list1, IEnumerable<double> list2)
+
+        public static Correlation CalculateSpearmanCorrelation(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculateSpearmanCorrelation(copy1, copy2);
+        }
+        public static Correlation CalculateSpearmanCorrelation(this IEnumerable<int> list1, IEnumerable<int> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add((double)item);
+            foreach (double item in list2) copy2.Add((double)item);
+            return _calculateSpearmanCorrelation(copy1, copy2);
+        }
+        private static Correlation _calculateSpearmanCorrelation(List<double> list1, List<double> list2)
+        {
+            if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
             int n = list1.Count();
+            if (n == 0) throw new EmptyListException();
+            if (n < 3) throw new NotTheRightSizeException();
             List<double> d = new List<double>();
-            double r = 0;
+            Dictionary<double, double> xRanks = Ranks.CalculateRanks(list1);
+            Dictionary<double, double> yRanks = Ranks.CalculateRanks(list2);
+
+            double rSum = 0;
 
             for (int i = 0; i < n; i++)
             {
-                d.Add(Ranks.CalculateRanks(list1)[Math.Abs(list1.ElementAt(i))] - Ranks.CalculateRanks(list2)[Math.Abs(list2.ElementAt(i))]);
-                r += d.ElementAt(i) * d.ElementAt(i);
+                d.Add(xRanks[Math.Abs(list1.ElementAt(i))] - yRanks[Math.Abs(list2.ElementAt(i))]);
+                rSum += d.ElementAt(i) * d.ElementAt(i);
             }
-            Console.WriteLine("r: " + r);
 
-            double p =1.0- (6 * r) / ((double)n * ((double)n * (double)n - 1.0));
-            double t = p * Math.Sqrt((n - 2.0) / (1.0 - p * p));
+            double r;
+            int nd = d.Count();
+            if(Ranks.SumOfTiedPairs(list1)==0 && Ranks.SumOfTiedPairs(list2) == 0)
+            {
+                r= 1.0 - (6 * rSum) / ((double)nd * ((double)nd * (double)nd - 1.0));
+            }
+            else
+            {
+                double sumX = (nd * nd * nd - nd - Ranks.SumOfTiedPairs(list1)) / 12.0;
+                double sumY = (nd * nd * nd - nd - Ranks.SumOfTiedPairs(list2)) / 12.0;
+                r = (sumX + sumY - rSum) / (2 * Math.Sqrt(sumX*sumY));
+
+            }
+            if (r >= 1 || r <= -1) throw new ArgumentException("Spearman correlation coefficient mus be in <-1;1>");
+
+            double t = r * Math.Sqrt(((double)n - 2.0) / (1.0 - r * r));
             double pval =ContinuousDistribution.Student(t,n-2);
 
-
-            return new Test
+            return new Correlation
             {
-                TestValue = Math.Round(p, 7),
+                CorrelationCoefficient = Math.Round(r, 6),
+                StudentsTValue = Math.Round(t, 6),
                 PValue = Math.Round(pval, 5)
             };
         }

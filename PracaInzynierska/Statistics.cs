@@ -215,7 +215,6 @@ namespace PracaInzynierska.Statystyka
             return _calculateSkewness(copy);
         }
 
-        //TODO: histogram, dominanta/moda/modalna, kurtoza
         public static List<double> _calculateMode(List<double> list)
         {
             if (list.Count == 0) throw new EmptyListException();
@@ -361,9 +360,10 @@ namespace PracaInzynierska.Statystyka
             };
         }
         
-        public static Test CalculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean=0)
+        private static Test _calculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean)
         {
             int n = list1.Count();
+            if (n == 0) throw new EmptyListException();
             double average = CalculateMean(list1);
             double standardDeviation = CalculateStandardDeviation(list1);
 
@@ -377,7 +377,7 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(p,5)
             };
         }
-        public static Test CalculateStudentsTTest(this IEnumerable<double> list1,IEnumerable<double> list2,bool pairs=false)
+        private static Test _calculateStudentsTTest(this IEnumerable<double> list1,IEnumerable<double> list2,bool pairs=false)
         {
             int n1 = list1.Count();
             int n2 = list2.Count();
@@ -395,21 +395,19 @@ namespace PracaInzynierska.Statystyka
                 double sd1 = (standardDeviation1 * standardDeviation1) / (double)n1;
                 double sd2 = (standardDeviation2 * standardDeviation2) / (double)n2;
                 double standardDeviationForTwoList = ((((double)n1 - 1.0) * standardDeviation1 * standardDeviation1 + ((double)n2 - 1.0) * standardDeviation2 * standardDeviation2) / ((double)n1 + (double)n2 - 2.0));
-                if (n1 == n2)
+                if (sd1 == sd2)
                 {
                     t = (average1 - average2) / (Math.Sqrt(standardDeviationForTwoList * ((1.0 / (double)n1) + (1.0 / (double)n2))));
-                    df = n1 + n2 - 1;
+                    df = n1 + n2-2;
                 }
                 else
                 {
-                    //Test t-Studenta z korektą Cochrana-Coxa
-                    //jest wyliczana wówczas, gdy wariancje badanych zmiennych w obu populacjach są różne.
                     t = (average1 - average2) / Math.Sqrt(sd1 + sd2);
+                    df = ((sd1 + sd2) * (sd1 + sd2)) / ((sd1 * sd1 * (1 / ((double)n1 - 1))) + (sd2 * sd2 * (1 / ((double)n2 - 1))));
                 }
-                df = ((sd1 + sd2) * (sd1 + sd2)) / ((sd1 * sd1 * (1 / ((double)n1 - 1))) + (sd2 * sd2 * (1 / ((double)n2 - 1))));
             }
             else {
-                if (n1 != n2) throw new ArgumentException("nie wszystkie argumenty mają tę samą długość");
+                if (n1 != n2) throw new NotTheSameLengthException();
                 List<double> listOfPairs = Util.DifferenceBetweenPairsOfMeasurements(list1, list2);
                 double averageForPairs = CalculateMean(listOfPairs);
                 double standardDeviationForPairs = CalculateStandardDeviation(listOfPairs);
@@ -425,27 +423,53 @@ namespace PracaInzynierska.Statystyka
                 PValue= Math.Round(p, 4)
             };
         }
-     
+
+        public static Test CalculateStudentsTTest(this IEnumerable<double> list, double hypotheticalMean = 0)
+        {
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add(item);
+            return _calculateStudentsTTest(copy, hypotheticalMean);
+        }
+        public static Test CalculateStudentsTTest(this IEnumerable<double> list1, IEnumerable<double> list2, bool pairs = false)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculateStudentsTTest(copy1, copy2, pairs);
+        }
+        public static Test CalculateStudentsTTest(this IEnumerable<int> list, double hypotheticalMean = 0)
+        {
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add((double)item);
+            return _calculateStudentsTTest(copy, hypotheticalMean);
+        }
+        public static Test CalculateStudentsTTest(this IEnumerable<int> list1, IEnumerable<int> list2, bool pairs = false)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add((double)item);
+            foreach (double item in list2) copy2.Add((double)item);
+            return _calculateStudentsTTest(copy1, copy2, pairs);
+        }
         public struct WilcoxonTest
         {
             public double T;
-            public double TCritic;
             public double ZStatistic;
             public double PValue;
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list,double hypotheticalMedian=0)
+        private static WilcoxonTest _calculateWilcoxonTest(List<double> list,double hypotheticalMedian=0)
         {
-            int n = list.Count();
+            if (list.Count() == 0) throw new EmptyListException();
             Rank r;
             if (hypotheticalMedian != 0)
-                r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list, hypotheticalMedian));
+                r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list,hypotheticalMedian));
             else
                 r = Ranks.CalculateRankForWilcoxonTest(list);
 
             double t = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
 
             double nRanks = r.NumberOfRanks;
-
             
             double zValue = (Math.Abs(t - ((nRanks * (nRanks + 1.0)) / 4.0)) - 0.5) / Math.Sqrt(((nRanks * (nRanks + 1.0) * (2.0 * nRanks + 1.0)) / 24.0) - r.CorrectionForTiedRanks);
 
@@ -458,16 +482,14 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(p, 4)
             };
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list1,IEnumerable<double> list2, bool pairs = false)
+        private static WilcoxonTest _calculateWilcoxonTest(List<double> list1,List<double> list2, bool pairs)
         {
-           
+            if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyListException();
             if (pairs) {
-                int n = Math.Max(list1.Count(), list2.Count());
+                if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
+
                 Rank r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
-                foreach (var el in Util.DifferenceBetweenPairsOfMeasurements(list1, list2))
-                {
-                    Console.WriteLine(el);
-                }
+                
                 double t = Math.Max(r.SumOfNegativeRanks, r.SumOfPositiveRanks);
                 double nRanks = (double)r.NumberOfRanks;
 
@@ -488,7 +510,6 @@ namespace PracaInzynierska.Statystyka
             }
           
         }
-
         private static WilcoxonTest _calculateTestUMannaWhitneya(List<double> list1, List<double> list2)
         {
             if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyListException();
@@ -525,6 +546,34 @@ namespace PracaInzynierska.Statystyka
             };
         }
 
+        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list, double hypotheticalMedian = 0)
+        {
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add(item);
+            return _calculateWilcoxonTest(copy, hypotheticalMedian);
+        }
+        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<int> list, double hypotheticalMedian = 0)
+        {
+            List<double> copy = new List<double>();
+            foreach (double item in list) copy.Add((double)item);
+            return _calculateWilcoxonTest(copy, hypotheticalMedian);
+        }
+        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list1, IEnumerable<double> list2, bool pairs = false)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculateWilcoxonTest(copy1, copy2,pairs);
+        }
+        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<int> list1, IEnumerable<int> list2, bool pairs = false)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add((double)item);
+            foreach (double item in list2) copy2.Add((double)item);
+            return _calculateWilcoxonTest(copy1, copy2,pairs);
+        }
         public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             List<double> copy1 = new List<double>();
@@ -890,11 +939,11 @@ namespace PracaInzynierska.Statystyka
 
         //Use F test to compare two variances
         //
-        public static FTest CalculateFTestToCompareTwoVariances(this IEnumerable<double> list1, IEnumerable<double> list2)
+        public static FTest _calculateFTestToCompareTwoVariances(List<double> list1, List<double> list2)
         {
             int n = list1.Count();
             int m = list2.Count();
-
+            if (n == 0 || m == 0) throw new EmptyListException();
             double f = CalculateSampleMeans(list1) / CalculateSampleMeans(list2);
 
             double p =2* ContinuousDistribution.FCdf(f, n-1, m-1);
@@ -907,7 +956,22 @@ namespace PracaInzynierska.Statystyka
                 
             };
         }
-
+        public static FTest CalculateFTestToCompareTwoVariances(this IEnumerable<int> list1, IEnumerable<int> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add((double)item);
+            foreach (double item in list2) copy2.Add((double)item);
+            return _calculateFTestToCompareTwoVariances(copy1, copy2);
+        }
+        public static FTest CalculateFTestToCompareTwoVariances(this IEnumerable<double> list1, IEnumerable<double> list2)
+        {
+            List<double> copy1 = new List<double>();
+            List<double> copy2 = new List<double>();
+            foreach (double item in list1) copy1.Add(item);
+            foreach (double item in list2) copy2.Add(item);
+            return _calculateFTestToCompareTwoVariances(copy1, copy2);
+        }
         //https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/8-chi-squared-tests
 
         private static Test _calculateChiSquaredTest(List<double> list)

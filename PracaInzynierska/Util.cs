@@ -33,7 +33,7 @@ namespace PracaInzynierska
 
         public static List<double> DifferenceBetweenPairsOfMeasurements(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
-
+            
             List<double> listOfDifference = new List<double>();
             int minN = Math.Min(list1.Count(), list2.Count());
             int maxN = Math.Max(list1.Count(), list2.Count());

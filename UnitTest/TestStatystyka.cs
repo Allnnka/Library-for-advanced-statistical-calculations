@@ -17,6 +17,7 @@ namespace TestAnalizaWyników
         readonly double[] tableDouble3 = { 1, 1, 1, 2, 2 };
         readonly double[] tableDouble4 = { 1, 1, 1, 2 };
 
+        readonly int[] emptyTableInt = { };
         readonly int[] tableInt1 = { 1, 2, 3, 4, 5 };
         readonly int[] tableInt2 = { 1, 2, 3, 4 };
         readonly int[] tableInt3 = { 1, 1, 1, 2, 2 };
@@ -285,7 +286,7 @@ namespace TestAnalizaWyników
        
 
         [TestMethod]
-        public void TestCalculateSingleSampleStudentsTTest()
+        public void TestCalculateSingleSampleStudentsTTestDouble()
         {
             double t1 = Statystyki.CalculateStudentsTTest(tableDouble1).TestValue;
             double t2 = Statystyki.CalculateStudentsTTest(tableDouble2).TestValue;
@@ -327,8 +328,53 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.07048, t3muPvalue);
             Assert.AreEqual(0.05767, t4muPValue);
 
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateStudentsTTest(emptyTable).TestValue);
         }
+        [TestMethod]
+        public void TestCalculateSingleSampleStudentsTTestInt()
+        {
+            double t1 = Statystyki.CalculateStudentsTTest(tableInt1).TestValue;
+            double t2 = Statystyki.CalculateStudentsTTest(tableInt2).TestValue;
+            double t3 = Statystyki.CalculateStudentsTTest(tableInt3).TestValue;
+            double t4 = Statystyki.CalculateStudentsTTest(tableInt4).TestValue;
 
+            Assert.AreEqual(4.2426, t1);
+            Assert.AreEqual(3.873, t2);
+            Assert.AreEqual(5.7155, t3);
+            Assert.AreEqual(5, t4);
+
+            double t1PValue = Statystyki.CalculateStudentsTTest(tableInt1).PValue;
+            double t2PValue = Statystyki.CalculateStudentsTTest(tableInt2).PValue;
+            double t3PValue = Statystyki.CalculateStudentsTTest(tableInt3).PValue;
+            double t4PValue = Statystyki.CalculateStudentsTTest(tableInt4).PValue;
+            Assert.AreEqual(0.01324, t1PValue);
+            Assert.AreEqual(0.03047, t2PValue);
+            Assert.AreEqual(0.00464, t3PValue);
+            Assert.AreEqual(0.01539, t4PValue);
+
+            double t1mu = Statystyki.CalculateStudentsTTest(tableInt1, 3).TestValue;
+            double t2mu = Statystyki.CalculateStudentsTTest(tableInt2, 3).TestValue;
+            double t3mu = Statystyki.CalculateStudentsTTest(tableInt3, 2).TestValue;
+            double t4mu = Statystyki.CalculateStudentsTTest(tableInt4, 2).TestValue;
+
+
+            Assert.AreEqual(0, t1mu);
+            Assert.AreEqual(-0.7746, t2mu);
+            Assert.AreEqual(-2.4495, t3mu);
+            Assert.AreEqual(-3, t4mu);
+
+            double t1muPValue = Statystyki.CalculateStudentsTTest(tableInt1, 3).PValue;
+            double t2muPValue = Statystyki.CalculateStudentsTTest(tableInt2, 3).PValue;
+            double t3muPvalue = Statystyki.CalculateStudentsTTest(tableInt3, 2).PValue;
+            double t4muPValue = Statystyki.CalculateStudentsTTest(tableInt4, 2).PValue;
+
+            Assert.AreEqual(1, t1muPValue);
+            Assert.AreEqual(0.49503, t2muPValue);
+            Assert.AreEqual(0.07048, t3muPvalue);
+            Assert.AreEqual(0.05767, t4muPValue);
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateStudentsTTest(emptyTableInt).TestValue);
+
+        }
         [TestMethod]
         public void TestCalculateStudentsTtestForIndependentGroups()
         {
@@ -388,7 +434,7 @@ namespace TestAnalizaWyników
 
 
         [TestMethod]
-        public void TestCalculateWilcoxonTest()
+        public void TestCalculateWilcoxonTestDouble()
         {
             double w1 = Statystyki.CalculateWilcoxonTest(tableDouble1).T;
             double w1PValue = Statystyki.CalculateWilcoxonTest(tableDouble1).PValue;
@@ -430,9 +476,51 @@ namespace TestAnalizaWyników
             Assert.AreEqual(1, w4muPvalue);
 
         }
-
         [TestMethod]
-        public void TestWilcoxonMatchedPairsTest()
+        public void TestCalculateWilcoxonTestInt()
+        {
+            double w1 = Statystyki.CalculateWilcoxonTest(tableInt1).T;
+            double w1PValue = Statystyki.CalculateWilcoxonTest(tableInt1).PValue;
+
+            double w1mu = Statystyki.CalculateWilcoxonTest(tableInt1, 2).T;
+            double w1muPValue = Statystyki.CalculateWilcoxonTest(tableInt1, 2).PValue;
+
+            double w2 = Statystyki.CalculateWilcoxonTest(tableInt2).T;
+            double w2PValue = Statystyki.CalculateWilcoxonTest(tableInt2).PValue;
+
+
+            double w3 = Statystyki.CalculateWilcoxonTest(tableInt3).T;
+            double w3PValue = Statystyki.CalculateWilcoxonTest(tableInt3).PValue;
+
+            double w4 = Statystyki.CalculateWilcoxonTest(tableInt4).T;
+            double w4PValue = Statystyki.CalculateWilcoxonTest(tableInt4).PValue;
+
+            double w4mu = Statystyki.CalculateWilcoxonTest(tableInt4, 1).T;
+            double w4muPvalue = Statystyki.CalculateWilcoxonTest(tableInt4, 1).PValue;
+
+
+
+            Assert.AreEqual(15, w1);
+            //Assert.AreEqual(0.0625, w1PValue);
+
+            Assert.AreEqual(8.5, w1mu);
+            Assert.AreEqual(0.2693, w1muPValue);
+
+            Assert.AreEqual(10, w2);
+            //Assert.AreEqual(0.125, w2PValue);
+
+            Assert.AreEqual(15, w3);
+            Assert.AreEqual(0.0533, w3PValue);
+
+            Assert.AreEqual(10, w4);
+            Assert.AreEqual(0.089, w4PValue);
+
+            Assert.AreEqual(1, w4mu);
+            Assert.AreEqual(1, w4muPvalue);
+
+        }
+        [TestMethod]
+        public void TestWilcoxonMatchedPairsTestDouble()
         {
             double w13 = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3,true).T;
             double w13PValue = Statystyki.CalculateWilcoxonTest(tableDouble1, tableDouble3, true).PValue;
@@ -446,8 +534,29 @@ namespace TestAnalizaWyników
             //wilcox.test(d2,d4, paired=TRUE) in RStudio
             Assert.AreEqual(6, w24);
             Assert.AreEqual(w24PValue,0.1736);
-        }
 
+            Assert.ThrowsException<NotTheSameLengthException>(() => Statystyki.CalculateWilcoxonTest(tableDouble1,tableDouble2,true).T);
+
+        }
+        [TestMethod]
+        public void TestWilcoxonMatchedPairsTestInt()
+        {
+            double w13 = Statystyki.CalculateWilcoxonTest(tableInt1, tableInt3, true).T;
+            double w13PValue = Statystyki.CalculateWilcoxonTest(tableInt1, tableInt3, true).PValue;
+
+            double w24 = Statystyki.CalculateWilcoxonTest(tableInt2, tableInt4, true).T;
+            double w24PValue = Statystyki.CalculateWilcoxonTest(tableInt2, tableInt4, true).PValue;
+
+
+            Assert.AreEqual(10, w13);
+            Assert.AreEqual(0.0975, w13PValue);
+            //wilcox.test(d2,d4, paired=TRUE) in RStudio
+            Assert.AreEqual(6, w24);
+            Assert.AreEqual(w24PValue, 0.1736);
+
+            Assert.ThrowsException<NotTheSameLengthException>(() => Statystyki.CalculateWilcoxonTest(tableInt1, tableInt2,true).T);
+
+        }
         [TestMethod]
         public void TestUMannaWhitneyaDouble()
         {
@@ -659,7 +768,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(3, ch42Df);
         }
         [TestMethod]
-        public void FTestToCompareTwoVariances()
+        public void TestFTestToCompareTwoVariancesDouble()
         {
             //var.test(d1,d2)
             double f12 = Statystyki.CalculateFTestToCompareTwoVariances(tableDouble1, tableDouble2).RatioOfVariances;
@@ -691,8 +800,45 @@ namespace TestAnalizaWyników
             Assert.AreEqual(f24numDf, 3);
             Assert.AreEqual(f24DenomDf, 3);
             Assert.AreEqual(f24pVal, 0.15353);
-        }
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, emptyTable).RatioOfVariances);
 
+        }
+        [TestMethod]
+        public void TestFTestToCompareTwoVariancesInt()
+        {
+            //var.test(d1,d2)
+            double f12 = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt2).RatioOfVariances;
+            double f12numDf = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt2).NumDf;
+            double f12DenomDf = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt2).DenomDf;
+            double f12pVal = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt2).PValue;
+
+            Assert.AreEqual(f12, 1.5);
+            Assert.AreEqual(f12numDf, 4);
+            Assert.AreEqual(f12DenomDf, 3);
+            Assert.AreEqual(f12pVal, 0.7698);
+
+            double f13 = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt3).RatioOfVariances;
+            double f13numDf = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt3).NumDf;
+            double f13DenomDf = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt3).DenomDf;
+            double f13pVal = Statystyki.CalculateFTestToCompareTwoVariances(tableInt1, tableInt3).PValue;
+
+            Assert.AreEqual(f13, 8.3333);
+            Assert.AreEqual(f13numDf, 4);
+            Assert.AreEqual(f13DenomDf, 4);
+            Assert.AreEqual(f13pVal, 0.06396);
+
+            double f24 = Statystyki.CalculateFTestToCompareTwoVariances(tableInt2, tableInt4).RatioOfVariances;
+            double f24numDf = Statystyki.CalculateFTestToCompareTwoVariances(tableInt2, tableInt4).NumDf;
+            double f24DenomDf = Statystyki.CalculateFTestToCompareTwoVariances(tableInt2, tableInt4).DenomDf;
+            double f24pVal = Statystyki.CalculateFTestToCompareTwoVariances(tableInt2, tableInt4).PValue;
+
+            Assert.AreEqual(f24, 6.6667);
+            Assert.AreEqual(f24numDf, 3);
+            Assert.AreEqual(f24DenomDf, 3);
+            Assert.AreEqual(f24pVal, 0.15353);
+
+            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateFTestToCompareTwoVariances(emptyTableInt, tableInt4).RatioOfVariances);
+        }
         [TestMethod]
         public void ChiSquaredTestDouble()
         {

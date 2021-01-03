@@ -93,7 +93,7 @@ namespace PracaInzynierska.Distribution
 
             if (n >= 20 && t < n || n > 200) // large df
             {
-                double x = 1.0 * n; // make df a double
+                double x = (double)n; // make df a double
                 return Student(t, x); // double version
             }
 

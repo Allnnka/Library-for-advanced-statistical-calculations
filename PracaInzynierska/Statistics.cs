@@ -461,13 +461,13 @@ namespace PracaInzynierska.Statystyka
             foreach (double item in list2) copy2.Add((double)item);
             return _calculateStudentsTTest(copy1, copy2, pairs);
         }
-        public struct WilcoxonTest
+        public struct WilcoxonResults
         {
             public double T;
             public double ZStatistic;
             public double PValue;
         }
-        private static WilcoxonTest _calculateWilcoxonTest(List<double> list,double hypotheticalMedian=0)
+        private static WilcoxonResults _calculateWilcoxonTest(List<double> list,double hypotheticalMedian=0)
         {
             if (list.Count() == 0) throw new EmptyCollectionException();
             Rank r;
@@ -484,14 +484,14 @@ namespace PracaInzynierska.Statystyka
 
             double p = 2*ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
-            return new WilcoxonTest
+            return new WilcoxonResults
             {
                 T = t,
                 ZStatistic = zValue,
                 PValue = Math.Round(p, 4)
             };
         }
-        private static WilcoxonTest _calculateWilcoxonTest(List<double> list1,List<double> list2, bool pairs)
+        private static WilcoxonResults _calculateWilcoxonTest(List<double> list1,List<double> list2, bool pairs)
         {
             if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyCollectionException();
             if (pairs) {
@@ -506,7 +506,7 @@ namespace PracaInzynierska.Statystyka
 
                 double p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
-                return new WilcoxonTest
+                return new WilcoxonResults
                 {
                     T = t,
                     ZStatistic = zValue,
@@ -519,7 +519,7 @@ namespace PracaInzynierska.Statystyka
             }
           
         }
-        private static WilcoxonTest _calculateTestUManaWhitney(List<double> list1, List<double> list2)
+        private static WilcoxonResults _calculateTestUManaWhitney(List<double> list1, List<double> list2)
         {
             if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyCollectionException();
             int n1 = list1.Count();
@@ -547,26 +547,26 @@ namespace PracaInzynierska.Statystyka
             double p = 2 * ContinuousDistribution.Gauss(-Math.Abs(zValue));
 
           
-            return new WilcoxonTest
+            return new WilcoxonResults
             {
                 T = u2,
                 ZStatistic = zValue,
                 PValue = Math.Round(p, 4)
             };
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list, double hypotheticalMedian = 0)
+        public static WilcoxonResults CalculateWilcoxonTest(this IEnumerable<double> list, double hypotheticalMedian = 0)
         {
             List<double> copy = new List<double>();
             foreach (double item in list) copy.Add(item);
             return _calculateWilcoxonTest(copy, hypotheticalMedian);
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<int> list, double hypotheticalMedian = 0)
+        public static WilcoxonResults CalculateWilcoxonTest(this IEnumerable<int> list, double hypotheticalMedian = 0)
         {
             List<double> copy = new List<double>();
             foreach (double item in list) copy.Add((double)item);
             return _calculateWilcoxonTest(copy, hypotheticalMedian);
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<double> list1, IEnumerable<double> list2, bool pairs = false)
+        public static WilcoxonResults CalculateWilcoxonTest(this IEnumerable<double> list1, IEnumerable<double> list2, bool pairs = false)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
@@ -574,7 +574,7 @@ namespace PracaInzynierska.Statystyka
             foreach (double item in list2) copy2.Add(item);
             return _calculateWilcoxonTest(copy1, copy2,pairs);
         }
-        public static WilcoxonTest CalculateWilcoxonTest(this IEnumerable<int> list1, IEnumerable<int> list2, bool pairs = false)
+        public static WilcoxonResults CalculateWilcoxonTest(this IEnumerable<int> list1, IEnumerable<int> list2, bool pairs = false)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
@@ -582,7 +582,7 @@ namespace PracaInzynierska.Statystyka
             foreach (double item in list2) copy2.Add((double)item);
             return _calculateWilcoxonTest(copy1, copy2,pairs);
         }
-        public static WilcoxonTest CalculateTestUMannWhitney(this IEnumerable<double> list1, IEnumerable<double> list2)
+        public static WilcoxonResults CalculateTestUMannWhitney(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
@@ -590,7 +590,7 @@ namespace PracaInzynierska.Statystyka
             foreach (double item in list2) copy2.Add(item);
             return _calculateTestUManaWhitney(copy1, copy2);
         }
-        public static WilcoxonTest CalculateTestUMannWhitney(this IEnumerable<int> list1, IEnumerable<int> list2)
+        public static WilcoxonResults CalculateTestUMannWhitney(this IEnumerable<int> list1, IEnumerable<int> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();

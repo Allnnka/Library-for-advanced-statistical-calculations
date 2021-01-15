@@ -9,22 +9,22 @@ namespace PracaInzynierska.Statystyka
 {
     public static class Statystyki
     {
-        public static double CalculateMean(this IEnumerable<double> list)
+        public static double CalculateMean(this IEnumerable<double> data)
         {
-            if (list.Count() == 0) throw new EmptyListException();
-            return list.Average();
+            if (data.Count() == 0) throw new EmptyCollectionException();
+            return data.Average();
         }
 
-        public static double CalculateMean(this IEnumerable<int> list)
+        public static double CalculateMean(this IEnumerable<int> data)
         {
-            if (list.Count() == 0) throw new EmptyListException();
-            return list.Select(i => (double)i).CalculateMean();
+            if (data.Count() == 0) throw new EmptyCollectionException();
+            return data.Select(i => (double)i).CalculateMean();
         }
 
-        public static double CalculateMean(this IEnumerable<long> list)
+        public static double CalculateMean(this IEnumerable<long> data)
         {
-            if (list.Count() == 0) throw new EmptyListException();
-            return list.Select(l => (double)l).CalculateMean();
+            if (data.Count() == 0) throw new EmptyCollectionException();
+            return data.Select(l => (double)l).CalculateMean();
         }
 
         public static double CalculateSampleMeans(this IEnumerable<double> list)
@@ -93,7 +93,7 @@ namespace PracaInzynierska.Statystyka
         }
         public static Quartile CalculateQuartile(this IEnumerable<double> list)
         {
-            if (list.Count() == 0) throw new EmptyListException();
+            if (list.Count() == 0) throw new EmptyCollectionException();
             List<double> _list = list.ToList();
             _list.Sort();
 
@@ -134,63 +134,67 @@ namespace PracaInzynierska.Statystyka
             return CalculateQuarterRange(list) / 2;
         }
 
-        private static double _calculateMedian(List<double> list)
+        private static double _calculateMedian(List<double> data)
         {
-            if (list.Count == 0) throw new EmptyListException();
+            if (data.Count == 0) throw new EmptyCollectionException();
 
-            list.Sort();
+            data.Sort();
 
-            if (list.Count % 2 != 0)
-                return list[list.Count / 2];
+            if (data.Count % 2 != 0)
+                return data[data.Count / 2];
             else
-                return (list[list.Count / 2 - 1] + list[list.Count / 2]) / 2.0;
+                return (data[data.Count / 2 - 1] + data[data.Count / 2]) / 2.0;
         }
 
-        public static double CalculateMedian(this IEnumerable<double> list)
+        public static double CalculateMedian(this IEnumerable<double> data)
         {
             List<double> copy = new List<double>();
-            foreach (double item in list) copy.Add(item);
+            foreach (double item in data) copy.Add(item);
             return _calculateMedian(copy);
         }
 
-        public static double CalculateMedian(this IEnumerable<int> list)
+        public static double CalculateMedian(this IEnumerable<int> data)
         {
             List<double> copy = new List<double>();
-            foreach (int item in list) copy.Add((double)item);
+            foreach (int item in data) copy.Add((double)item);
             return _calculateMedian(copy);
         }
 
-        public static double CalculateMedian(this IEnumerable<long> list)
+        public static double CalculateMedian(this IEnumerable<long> data)
         {
             List<double> copy = new List<double>();
-            foreach (long item in list) copy.Add((double)item);
+            foreach (long item in data) copy.Add((double)item);
             return _calculateMedian(copy);
         }
-        private static double _calculateSkewness(List<double> list, int type = 3)
+        public enum SkewnessType { type1, type2,type3 };
+
+        private static double _calculateSkewness(List<double> list, SkewnessType type=SkewnessType.type3)
         {
-            if (list.Count == 0) throw new EmptyListException();
+            if (list.Count == 0) throw new EmptyCollectionException();
 
             double m3 = 0;
             double m2 = 0;
             int n = list.Count();
             double mean = CalculateMean(list);
+            double temp, _m2;
             foreach (double item in list)
             {
-                m3 += (item - mean) * (item - mean) * (item - mean);
-                m2 += (item - mean) * (item - mean);
+                temp = (item - mean);
+                _m2 = temp * temp;
+                m3 += _m2*temp;
+                m2 += _m2;
             }
             double A;
             switch (type)
             {
-                case 1:
-                    A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2);
+                case SkewnessType.type1:
+                    A = Math.Sqrt(n / m2 * m2 * m2) * m3;
                     break;
-                case 2:
-                    A = (n * Math.Sqrt(n - 1) * m3) / (Math.Sqrt(m2 * m2 * m2) * (n - 2));
+                case SkewnessType.type2:
+                    A = (n * Math.Sqrt((n - 1)/ m2 * m2 * m2) * m3) / (n - 2);
                     break;
-                case 3:
-                    A = (Math.Sqrt(n) * m3) / Math.Sqrt(m2 * m2 * m2)
-                        * Math.Sqrt((1 - 1.0 / n) * (1 - 1.0 / n) * (1 - 1.0 / n));
+                case SkewnessType.type3:
+                    A = (Math.Sqrt(n * (1 - 1.0 / n) * (1 - 1.0 / n) * (1 - 1.0 / n) / m2 * m2 * m2) * m3);
                     break;
                 default:
                     throw new InvalidArgument("type");
@@ -212,13 +216,13 @@ namespace PracaInzynierska.Statystyka
             return _calculateSkewness(copy);
         }
 
-        public static List<double> _calculateMode(List<double> list)
+        public static double[] _calculateMode(List<double> data)
         {
-            if (list.Count == 0) throw new EmptyListException();
+            if (data.Count == 0) throw new EmptyCollectionException();
 
             List<double> currentMax = new List<double>();
 
-            Dictionary<double, int> dictNumberOfOccurrencesOfElements = list.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+            Dictionary<double, int> dictNumberOfOccurrencesOfElements = data.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
 
             if (!((dictNumberOfOccurrencesOfElements.Values.GroupBy(x => x).Where(x => x.Count() >= 1))
                 .Count() > 1)) throw new Exception("There is no dominant in a given set");
@@ -238,62 +242,65 @@ namespace PracaInzynierska.Statystyka
                     currentMax.Add(x.Key);
                 }
             }
-            return currentMax;
+            return currentMax.ToArray();
         }
 
-        public static List<double> CalculateMode(this IEnumerable<double> list)
+        public static double[] CalculateMode(this IEnumerable<double> data)
         {
             List<double> copy = new List<double>();
-            foreach (int item in list) copy.Add(item);
+            foreach (int item in data) copy.Add(item);
             return _calculateMode(copy);
 
         }
-        public static List<double> CalculateMode(this IEnumerable<long> list)
+        public static double[] CalculateMode(this IEnumerable<long> data)
         {
             List<double> copy = new List<double>();
-            foreach (int item in list) copy.Add((double)item);
+            foreach (int item in data) copy.Add((double)item);
             return _calculateMode(copy);
 
         }
-        public static List<double> CalculateMode(this IEnumerable<int> list)
+        public static double[] CalculateMode(this IEnumerable<int> data)
         {
             List<double> copy = new List<double>();
-            foreach (int item in list) copy.Add((double)item);
+            foreach (int item in data) copy.Add((double)item);
             return _calculateMode(copy);
         }
 
-        private static double _calculateKurtosis(List<double> list)
+        private static double _calculateKurtosis(List<double> data)
         {
-            if (list.Count() == 0) throw new EmptyListException();
-            int n = list.Count();
-            double mean = CalculateMean(list);
+            if (data.Count() == 0) throw new EmptyCollectionException();
+            int n = data.Count();
+            double mean = CalculateMean(data);
             double m2 = 0;
             double m4 = 0;
-            foreach (double item in list)
+            double help, _m2;
+            foreach (double item in data)
             {
-                m2 += (item - mean) * (item - mean);
-                m4 += (item - mean) * (item - mean) * (item - mean) * (item - mean);
+                help = (item - mean);
+                _m2 = help*help;
+                m2 += _m2;
+                m4 += _m2*_m2;
             }
             double k = (n * m4) / (m2 * m2);
             return Math.Round(k, 6);
         }
 
-        public static double CalculateKurtosis(this IEnumerable<double> list)
+        public static double CalculateKurtosis(this IEnumerable<double> data)
         {
             List<double> copy = new List<double>();
-            foreach (double item in list) copy.Add(item);
+            foreach (double item in data) copy.Add(item);
             return _calculateKurtosis(copy);
         }
-        public static double CalculateKurtosis(this IEnumerable<int> list)
+        public static double CalculateKurtosis(this IEnumerable<int> data)
         {
             List<double> copy = new List<double>();
-            foreach (int item in list) copy.Add((double)item);
+            foreach (int item in data) copy.Add((double)item);
             return _calculateKurtosis(copy);
         }
-        public static double CalculateKurtosis(this IEnumerable<long> list)
+        public static double CalculateKurtosis(this IEnumerable<long> data)
         {
             List<double> copy = new List<double>();
-            foreach (long item in list) copy.Add((double)item);
+            foreach (long item in data) copy.Add((double)item);
             return _calculateKurtosis(copy);
         }
         public struct Correlation
@@ -304,28 +311,28 @@ namespace PracaInzynierska.Statystyka
             public double StudentsTValue;
         }
 
-        public static Correlation CalculatePearsonsCorrelationCoefficient(this IEnumerable<double> list1, IEnumerable<double> list2)
+        public static Correlation CalculatePearsonsCorrelation(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
             foreach (double item in list1) copy1.Add(item);
             foreach (double item in list2) copy2.Add(item);
-            return _calculatePearsonsCorrelationCoefficient(copy1, copy2);
+            return _calculatePearsonsCorrelation(copy1, copy2);
         }
-        public static Correlation CalculatePearsonsCorrelationCoefficient(this IEnumerable<int> list1, IEnumerable<int> list2)
+        public static Correlation CalculatePearsonsCorrelation(this IEnumerable<int> list1, IEnumerable<int> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
             foreach (double item in list1) copy1.Add((double)item);
             foreach (double item in list2) copy2.Add((double)item);
-            return _calculatePearsonsCorrelationCoefficient(copy1, copy2);
+            return _calculatePearsonsCorrelation(copy1, copy2);
         }
 
-        private static Correlation _calculatePearsonsCorrelationCoefficient(List<double> list1, List<double> list2)
+        private static Correlation _calculatePearsonsCorrelation(List<double> list1, List<double> list2)
         {
-            if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
+            if (list1.Count() != list2.Count()) throw new SizeOutOfRangeException();
             int n = list1.Count();
-            if (n == 0) throw new EmptyListException();
+            if (n == 0) throw new EmptyCollectionException();
             if (n < 3) throw new NotTheRightSizeException();
             double average1 = CalculateMean(list1);
             double average2 = CalculateMean(list2);
@@ -364,24 +371,24 @@ namespace PracaInzynierska.Statystyka
             };
         }
         
-        private static Test _calculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean)
+        private static TestResult _calculateStudentsTTest(this IEnumerable<double> list1, double hypotheticalMean)
         {
             int n = list1.Count();
-            if (n == 0) throw new EmptyListException();
+            if (n == 0) throw new EmptyCollectionException();
             double average = CalculateMean(list1);
             double standardDeviation = CalculateStandardDeviation(list1);
 
             double tforOneSample = ((average - hypotheticalMean) / standardDeviation) * Math.Sqrt(n);
             int df = 1;
             double p = ContinuousDistribution.Student(tforOneSample,n-1);
-            return new Test()
+            return new TestResult()
             {
                 TestValue = Math.Round(tforOneSample, 4),
                 DegreesOfFreedom = df,
                 PValue = Math.Round(p,5)
             };
         }
-        private static Test _calculateStudentsTTest(this IEnumerable<double> list1,IEnumerable<double> list2,bool pairs=false)
+        private static TestResult _calculateStudentsTTest(this IEnumerable<double> list1,IEnumerable<double> list2,bool pairs=false)
         {
             int n1 = list1.Count();
             int n2 = list2.Count();
@@ -391,8 +398,7 @@ namespace PracaInzynierska.Statystyka
 
             double standardDeviation1 = CalculateStandardDeviation(list1);
             double standardDeviation2 = CalculateStandardDeviation(list2);
-            double t=0;
-            double df=0;
+            double t, df;
            
             if (!pairs)
             {
@@ -411,7 +417,7 @@ namespace PracaInzynierska.Statystyka
                 }
             }
             else {
-                if (n1 != n2) throw new NotTheSameLengthException();
+                if (n1 != n2) throw new SizeOutOfRangeException();
                 List<double> listOfPairs = Util.DifferenceBetweenPairsOfMeasurements(list1, list2);
                 double averageForPairs = CalculateMean(listOfPairs);
                 double standardDeviationForPairs = CalculateStandardDeviation(listOfPairs);
@@ -420,20 +426,20 @@ namespace PracaInzynierska.Statystyka
             }
 
             double p = ContinuousDistribution.Student(t, df);
-            return new Test()
+            return new TestResult()
             {
                 TestValue = Math.Round(t,4),
                 DegreesOfFreedom= Math.Round(df,4),
                 PValue= Math.Round(p, 4)
             };
         }
-        public static Test CalculateStudentsTTest(this IEnumerable<double> list, double hypotheticalMean = 0)
+        public static TestResult CalculateStudentsTTest(this IEnumerable<double> list, double hypotheticalMean = 0)
         {
             List<double> copy = new List<double>();
             foreach (double item in list) copy.Add(item);
             return _calculateStudentsTTest(copy, hypotheticalMean);
         }
-        public static Test CalculateStudentsTTest(this IEnumerable<double> list1, IEnumerable<double> list2, bool pairs = false)
+        public static TestResult CalculateStudentsTTest(this IEnumerable<double> list1, IEnumerable<double> list2, bool pairs = false)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
@@ -441,13 +447,13 @@ namespace PracaInzynierska.Statystyka
             foreach (double item in list2) copy2.Add(item);
             return _calculateStudentsTTest(copy1, copy2, pairs);
         }
-        public static Test CalculateStudentsTTest(this IEnumerable<int> list, double hypotheticalMean = 0)
+        public static TestResult CalculateStudentsTTest(this IEnumerable<int> list, double hypotheticalMean = 0)
         {
             List<double> copy = new List<double>();
             foreach (double item in list) copy.Add((double)item);
             return _calculateStudentsTTest(copy, hypotheticalMean);
         }
-        public static Test CalculateStudentsTTest(this IEnumerable<int> list1, IEnumerable<int> list2, bool pairs = false)
+        public static TestResult CalculateStudentsTTest(this IEnumerable<int> list1, IEnumerable<int> list2, bool pairs = false)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
@@ -463,7 +469,7 @@ namespace PracaInzynierska.Statystyka
         }
         private static WilcoxonTest _calculateWilcoxonTest(List<double> list,double hypotheticalMedian=0)
         {
-            if (list.Count() == 0) throw new EmptyListException();
+            if (list.Count() == 0) throw new EmptyCollectionException();
             Rank r;
             if (hypotheticalMedian != 0)
                 r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list,hypotheticalMedian));
@@ -487,9 +493,9 @@ namespace PracaInzynierska.Statystyka
         }
         private static WilcoxonTest _calculateWilcoxonTest(List<double> list1,List<double> list2, bool pairs)
         {
-            if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyListException();
+            if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyCollectionException();
             if (pairs) {
-                if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
+                if (list1.Count() != list2.Count()) throw new SizeOutOfRangeException();
 
                 Rank r = Ranks.CalculateRankForWilcoxonTest(Util.DifferenceBetweenPairsOfMeasurements(list1, list2));
                 
@@ -509,13 +515,13 @@ namespace PracaInzynierska.Statystyka
             }
             else
             {
-                return CalculateTestUMannaWhitneya(list1, list2);
+                return CalculateTestUMannWhitney(list1, list2);
             }
           
         }
-        private static WilcoxonTest _calculateTestUMannaWhitneya(List<double> list1, List<double> list2)
+        private static WilcoxonTest _calculateTestUManaWhitney(List<double> list1, List<double> list2)
         {
-            if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyListException();
+            if (list1.Count() == 0 || list2.Count() == 0) throw new EmptyCollectionException();
             int n1 = list1.Count();
             int n2 = list2.Count();
             List<double> list3 = list1.Concat(list2).OrderBy(x => Math.Abs(x)).ToList();
@@ -576,31 +582,31 @@ namespace PracaInzynierska.Statystyka
             foreach (double item in list2) copy2.Add((double)item);
             return _calculateWilcoxonTest(copy1, copy2,pairs);
         }
-        public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<double> list1, IEnumerable<double> list2)
+        public static WilcoxonTest CalculateTestUMannWhitney(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
             foreach (double item in list1) copy1.Add(item);
             foreach (double item in list2) copy2.Add(item);
-            return _calculateTestUMannaWhitneya(copy1, copy2);
+            return _calculateTestUManaWhitney(copy1, copy2);
         }
-        public static WilcoxonTest CalculateTestUMannaWhitneya(this IEnumerable<int> list1, IEnumerable<int> list2)
+        public static WilcoxonTest CalculateTestUMannWhitney(this IEnumerable<int> list1, IEnumerable<int> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
             foreach (double item in list1) copy1.Add((double)item);
             foreach (double item in list2) copy2.Add((double)item);
-            return _calculateTestUMannaWhitneya(copy1, copy2);
+            return _calculateTestUManaWhitney(copy1, copy2);
         }
-        public struct Test
+        public struct TestResult
         {
             public double TestValue;
             public double PValue;
             public double DegreesOfFreedom;
         }
-        private static Test _calculateKolmogorovSmirnovTestForNormality(List<double> list)
+        private static TestResult _calculateKolmogorovSmirnovTestForNormality(List<double> list)
         {
-            if (list.Count() == 0) throw new EmptyListException();
+            if (list.Count() == 0) throw new EmptyCollectionException();
             list.OrderBy(x => x);
             int n = list.Count();
             List<double> Di = new List<double>();
@@ -626,19 +632,19 @@ namespace PracaInzynierska.Statystyka
                 pValue += (Math.Pow((-1.0), ((double)i - 1.0))) * (Math.Exp((-2.0) * ((double)i * (double)i) * zz));
             }
             double p =2.0 * pValue;
-            return new Test
+            return new TestResult
             {
                 TestValue = Math.Round(d, 5),
                 PValue= Math.Round(p, 4)
             }; 
         }
-        public static Test CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<double> list)
+        public static TestResult CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<double> list)
         {
             List<double> copy = new List<double>();
             foreach (double item in list) copy.Add(item);
             return _calculateKolmogorovSmirnovTestForNormality(copy);
         }
-        public static Test CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<int> list)
+        public static TestResult CalculateKolmogorovSmirnovTestForNormality(this IEnumerable<int> list)
         {
             List<double> copy = new List<double>();
             foreach (int item in list) copy.Add((double)item);
@@ -671,7 +677,7 @@ namespace PracaInzynierska.Statystyka
             return (x > 0) ? 1 : -1;
         }
 
-        private static Test _calculateShapiroWilkTestForNormality(List<double> list)
+        private static TestResult _calculateShapiroWilkTest(List<double> list)
         {
             if (list.Count() < 3 || list.Count() > 5000) throw new NotTheRightSizeException();
             list.OrderBy(x => x);
@@ -838,29 +844,29 @@ namespace PracaInzynierska.Statystyka
                     pValue = Math.Round(ContinuousDistribution.Gauss(-Math.Abs(z)),5);
 
             }
-            return new Test
+            return new TestResult
             {
                 TestValue = Math.Round(w, 5),
                 PValue =pValue
             };
         }
-        public static Test CalculateShapiroWilkTestForNormality(this IEnumerable<double> list)
+        public static TestResult CalculateShapiroWilkTest(this IEnumerable<double> list)
         {
             List<double> copy = new List<double>();
             foreach (float item in list) copy.Add(item);
-            return _calculateShapiroWilkTestForNormality(copy);
+            return _calculateShapiroWilkTest(copy);
         }
-        public static Test CalculateShapiroWilkTestForNormality(this IEnumerable<int> list)
+        public static TestResult CalculateShapiroWilkTest(this IEnumerable<int> list)
         {
             List<double> copy = new List<double>();
             foreach (float item in list) copy.Add((double)item);
-            return _calculateShapiroWilkTestForNormality(copy);
+            return _calculateShapiroWilkTest(copy);
         }
         //https://stats.stackexchange.com/questions/381873/meaning-of-chi-squared-in-r-kruskal-wallis-test
-        private static Test _calculateKruskalaWalisaTest(List<double> list1,List<double> list2)
+        private static TestResult _calculateKruskalWalisTest(List<double> list1,List<double> list2)
         {
-            if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
-            if (list1.Count() ==0 || list2.Count()==0) throw new EmptyListException();
+            if (list1.Count() != list2.Count()) throw new SizeOutOfRangeException();
+            if (list1.Count() ==0 || list2.Count()==0) throw new EmptyCollectionException();
             List<double> factorList = list2.Distinct().ToList();
 
             int n = list1.Count();
@@ -902,8 +908,8 @@ namespace PracaInzynierska.Statystyka
             kwScore =kwScore/ correctionForTied;
             kwScore =Math.Round(kwScore,1);
             int df = factorList.Count() - 1;
-            double pVal = 1.0- ContinuousDistribution.ChisquareCdf(kwScore,df);
-            return new Test
+            double pVal = 1.0- ContinuousDistribution.ChiSquareCdf(kwScore,df);
+            return new TestResult
             {
                 TestValue = kwScore,
                 PValue = Math.Round(pVal,4),
@@ -911,21 +917,21 @@ namespace PracaInzynierska.Statystyka
             };
         }
 
-        public static Test CalculateKruskalaWalisaTest(this IEnumerable<double> list1, IEnumerable<double> list2)
+        public static TestResult CalculateKruskalWalisTest(this IEnumerable<double> list1, IEnumerable<double> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
             foreach (double item in list1) copy1.Add(item);
             foreach (double item in list2) copy2.Add(item);
-            return _calculateKruskalaWalisaTest(copy1,copy2);
+            return _calculateKruskalWalisTest(copy1,copy2);
         }
-        public static Test CalculateKruskalaWalisaTest(this IEnumerable<int> list1, IEnumerable<int> list2)
+        public static TestResult CalculateKruskalWalisTest(this IEnumerable<int> list1, IEnumerable<int> list2)
         {
             List<double> copy1 = new List<double>();
             List<double> copy2 = new List<double>();
             foreach (int item in list1) copy1.Add((double)item);
             foreach (int item in list2) copy2.Add((double)item);
-            return _calculateKruskalaWalisaTest(copy1, copy2);
+            return _calculateKruskalWalisTest(copy1, copy2);
         }
         public struct FTest
         {
@@ -941,7 +947,7 @@ namespace PracaInzynierska.Statystyka
         {
             int n = list1.Count();
             int m = list2.Count();
-            if (n == 0 || m == 0) throw new EmptyListException();
+            if (n == 0 || m == 0) throw new EmptyCollectionException();
             double f = CalculateSampleMeans(list1) / CalculateSampleMeans(list2);
 
             double p =2* ContinuousDistribution.FCdf(f, n-1, m-1);
@@ -972,11 +978,11 @@ namespace PracaInzynierska.Statystyka
         }
         //https://www.bmj.com/about-bmj/resources-readers/publications/statistics-square-one/8-chi-squared-tests
 
-        private static Test _calculateChiSquaredTest(List<double> list)
+        private static TestResult _calculateChiSquaredTest(List<double> list)
         {
             
             int n = list.Count();
-            if (n == 0) throw new EmptyListException();
+            if (n == 0) throw new EmptyCollectionException();
             double statistic = 0;
 
             double expectedA = list.Average();    
@@ -986,22 +992,22 @@ namespace PracaInzynierska.Statystyka
                 statistic += ((list.ElementAt(i) - expectedA) * (list.ElementAt(i) - expectedA)) / expectedA;
             }
             int df = n - 1;
-            double pval = 1.0 - ContinuousDistribution.ChisquareCdf(statistic, df);
+            double pval = 1.0 - ContinuousDistribution.ChiSquareCdf(statistic, df);
 
-            return new Test
+            return new TestResult
             {
                 TestValue = Math.Round(statistic, 5),
                 DegreesOfFreedom = df,
                 PValue = Math.Round(pval, 4)
             };
         }
-        private static Test _calculateChiSquaredTest(params List<double>[] args)
+        private static TestResult _calculateChiSquaredTest(params List<double>[] args)
         {
             int nCols = args.Length;
             int nRows = args.FirstOrDefault().Count();
             foreach (List<double> list in args)
             {
-                if (nRows != list.Count()) throw new NotTheSameLengthException();
+                if (nRows != list.Count()) throw new SizeOutOfRangeException();
             }
             List<double> n = Enumerable.Repeat<double>(0, nRows).ToList();
 
@@ -1029,15 +1035,15 @@ namespace PracaInzynierska.Statystyka
                 rowNum++;
             }
             int df = (nCols - 1) * (nRows - 1);
-            double pval = 1.0 - ContinuousDistribution.ChisquareCdf(statistic, df);
-            return new Test
+            double pval = 1.0 - ContinuousDistribution.ChiSquareCdf(statistic, df);
+            return new TestResult
             {
                 TestValue = Math.Round(statistic, 5),
                 DegreesOfFreedom = df,
                 PValue = Math.Round(pval, 4)
             };
         }
-        public static Test CalculateChiSquaredTest(params IEnumerable<double>[] args)
+        public static TestResult CalculateChiSquaredTest(params IEnumerable<double>[] args)
         {
             if (args.Length == 1)
             {
@@ -1069,7 +1075,7 @@ namespace PracaInzynierska.Statystyka
             }
             
         }
-        public static Test CalculateChiSquaredTest(params IEnumerable<int>[] args)
+        public static TestResult CalculateChiSquaredTest(params IEnumerable<int>[] args)
         {
             if (args.Length == 1)
             {
@@ -1119,9 +1125,9 @@ namespace PracaInzynierska.Statystyka
         }
         private static Correlation _calculateSpearmanCorrelation(List<double> list1, List<double> list2)
         {
-            if (list1.Count() != list2.Count()) throw new NotTheSameLengthException();
+            if (list1.Count() != list2.Count()) throw new SizeOutOfRangeException();
             int n = list1.Count();
-            if (n == 0) throw new EmptyListException();
+            if (n == 0) throw new EmptyCollectionException();
             if (n < 3) throw new NotTheRightSizeException();
             List<double> d = new List<double>();
             Dictionary<double, double> xRanks = Ranks.CalculateRanks(list1);
@@ -1148,7 +1154,6 @@ namespace PracaInzynierska.Statystyka
                 r = (sumX + sumY - rSum) / (2 * Math.Sqrt(sumX*sumY));
 
             }
-            if (r >= 1 || r <= -1) throw new ArgumentException("Spearman correlation coefficient mus be in <-1;1>");
 
             double t = r * Math.Sqrt(((double)n - 2.0) / (1.0 - r * r));
             double pval =ContinuousDistribution.Student(t,n-2);

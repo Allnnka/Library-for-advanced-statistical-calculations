@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ANOVA.cs" />
     <Compile Include="DescriptiveStatistics\Ranks.cs" />
     <Compile Include="Distribution\ContinuousDistribution.cs" />
     <Compile Include="ProgramExceptions.cs" />

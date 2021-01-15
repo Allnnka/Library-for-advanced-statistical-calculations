@@ -36,7 +36,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(2.5, mean2);
             Assert.AreEqual(1.4, mean3);
             Assert.AreEqual(1.25, mean4);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMean(emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateMean(emptyTable));
         }
         [TestMethod]
         public void TestCalculateMeanInt()
@@ -50,7 +50,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(2.5, mean2);
             Assert.AreEqual(1.4, mean3);
             Assert.AreEqual(1.25, mean4);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMean(emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateMean(emptyTable));
 
         }
         [TestMethod]
@@ -65,7 +65,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(2.5, median2);
             Assert.AreEqual(1, median3);
             Assert.AreEqual(1, median4);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMedian(emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateMedian(emptyTable));
 
         }
 
@@ -81,7 +81,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(2.5, median2);
             Assert.AreEqual(1, median3);
             Assert.AreEqual(1, median4);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMedian(emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateMedian(emptyTable));
 
         }
         [TestMethod]
@@ -110,7 +110,7 @@ namespace TestAnalizaWyników
 
             Assert.AreEqual(1, q41);
             Assert.AreEqual(1.5, q43);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateQuartile(emptyTable).q1);
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateQuartile(emptyTable).q1);
 
         }
         [TestMethod]
@@ -164,31 +164,31 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestCalculateModeDouble()
         {
-            List<double> moda3 = Statystyki.CalculateMode(tableDouble3);
-            List<double> moda4 = Statystyki.CalculateMode(tableDouble4);
+            double[] moda3 = Statystyki.CalculateMode(tableDouble3);
+            double[] moda4 = Statystyki.CalculateMode(tableDouble4);
 
 
             Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableDouble1));
             Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableDouble2));
-            CollectionAssert.AreEqual(new List<double>() {1}, moda3);
-            CollectionAssert.AreEqual(new List<double>() {1}, moda4);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMode(emptyTable));
+            CollectionAssert.AreEqual(new double[] { 1}, moda3);
+            CollectionAssert.AreEqual(new double[] { 1}, moda4);
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateMode(emptyTable));
 
 
         }
         [TestMethod]
         public void TestCalculateModeInt()
         {
-            List<double> moda3 = Statystyki.CalculateMode(tableInt3);
-            List<double> moda4 = Statystyki.CalculateMode(tableInt4);
+            double[] moda3 = Statystyki.CalculateMode(tableInt3);
+            double[] moda4 = Statystyki.CalculateMode(tableInt4);
 
 
             Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableInt1));
             Assert.ThrowsException<Exception>(() => Statystyki.CalculateMode(tableInt2));
-            CollectionAssert.AreEqual(new List<double>() { 1 }, moda3);
-            CollectionAssert.AreEqual(new List<double>() { 1 }, moda4);
+            CollectionAssert.AreEqual(new double[] { 1 }, moda3);
+            CollectionAssert.AreEqual(new double[] { 1 }, moda4);
 
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateMode(emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateMode(emptyTable));
 
 
         }
@@ -271,11 +271,11 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestPearsonsCorrelationCoefficientDouble()
         {
-            double cor1 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble1, tableDouble3).CorrelationCoefficient;
-            double cor2 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble2, tableDouble4).CorrelationCoefficient;
+            double cor1 = Statystyki.CalculatePearsonsCorrelation(tableDouble1, tableDouble3).CorrelationCoefficient;
+            double cor2 = Statystyki.CalculatePearsonsCorrelation(tableDouble2, tableDouble4).CorrelationCoefficient;
 
-            double cor1PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble1, tableDouble3).PValue;
-            double cor2PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableDouble2, tableDouble4).PValue;
+            double cor1PValue = Statystyki.CalculatePearsonsCorrelation(tableDouble1, tableDouble3).PValue;
+            double cor2PValue = Statystyki.CalculatePearsonsCorrelation(tableDouble2, tableDouble4).PValue;
 
             Assert.AreEqual(0.8660254, cor1);
             Assert.AreEqual(0.7745967, cor2);
@@ -287,11 +287,11 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestPearsonsCorrelationCoefficientInt()
         {
-            double cor1 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt1, tableInt3).CorrelationCoefficient;
-            double cor2 = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt2, tableInt4).CorrelationCoefficient;
+            double cor1 = Statystyki.CalculatePearsonsCorrelation(tableInt1, tableInt3).CorrelationCoefficient;
+            double cor2 = Statystyki.CalculatePearsonsCorrelation(tableInt2, tableInt4).CorrelationCoefficient;
 
-            double cor1PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt1, tableInt3).PValue;
-            double cor2PValue = Statystyki.CalculatePearsonsCorrelationCoefficient(tableInt2, tableInt4).PValue;
+            double cor1PValue = Statystyki.CalculatePearsonsCorrelation(tableInt1, tableInt3).PValue;
+            double cor2PValue = Statystyki.CalculatePearsonsCorrelation(tableInt2, tableInt4).PValue;
 
             Assert.AreEqual(0.8660254, cor1);
             Assert.AreEqual(0.7745967, cor2);
@@ -343,7 +343,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.07048, t3muPvalue);
             Assert.AreEqual(0.05767, t4muPValue);
 
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateStudentsTTest(emptyTable).TestValue);
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateStudentsTTest(emptyTable).TestValue);
         }
         [TestMethod]
         public void TestCalculateSingleSampleStudentsTTestInt()
@@ -387,7 +387,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.49503, t2muPValue);
             Assert.AreEqual(0.07048, t3muPvalue);
             Assert.AreEqual(0.05767, t4muPValue);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateStudentsTTest(emptyTableInt).TestValue);
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateStudentsTTest(emptyTableInt).TestValue);
 
         }
 
@@ -605,7 +605,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(6, w24);
             Assert.AreEqual(w24PValue,0.1736);
 
-            Assert.ThrowsException<NotTheSameLengthException>(() => Statystyki.CalculateWilcoxonTest(tableDouble1,tableDouble2,true).T);
+            Assert.ThrowsException<SizeOutOfRangeException>(() => Statystyki.CalculateWilcoxonTest(tableDouble1,tableDouble2,true).T);
 
         }
         [TestMethod]
@@ -624,58 +624,58 @@ namespace TestAnalizaWyników
             Assert.AreEqual(6, w24);
             Assert.AreEqual(w24PValue, 0.1736);
 
-            Assert.ThrowsException<NotTheSameLengthException>(() => Statystyki.CalculateWilcoxonTest(tableInt1, tableInt2,true).T);
+            Assert.ThrowsException<SizeOutOfRangeException>(() => Statystyki.CalculateWilcoxonTest(tableInt1, tableInt2,true).T);
 
         }
         [TestMethod]
-        public void TestUMannaWhitneyaDouble()
+        public void TestUMannWhitneyDouble()
         {
             //in RStudio to samo co wilcox.test(d1,d4)
 
-            double w13 = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble3).T;
-            double w13PValue = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble3).PValue;
+            double w13 = Statystyki.CalculateTestUMannWhitney(tableDouble1, tableDouble3).T;
+            double w13PValue = Statystyki.CalculateTestUMannWhitney(tableDouble1, tableDouble3).PValue;
             Assert.AreEqual(20.5, w13);
             Assert.AreEqual(0.1015, w13PValue);
 
 
-            double w14 = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble4).T;
-            double w14PValue = Statystyki.CalculateTestUMannaWhitneya(tableDouble1, tableDouble4).PValue;
+            double w14 = Statystyki.CalculateTestUMannWhitney(tableDouble1, tableDouble4).T;
+            double w14PValue = Statystyki.CalculateTestUMannWhitney(tableDouble1, tableDouble4).PValue;
             
             Assert.AreEqual(17, w14);
             Assert.AreEqual(0.0948, w14PValue);
 
-            double w43 = Statystyki.CalculateTestUMannaWhitneya(tableDouble4, tableDouble3).T;
-            double w43PValue = Statystyki.CalculateTestUMannaWhitneya(tableDouble4, tableDouble3).PValue;
+            double w43 = Statystyki.CalculateTestUMannWhitney(tableDouble4, tableDouble3).T;
+            double w43PValue = Statystyki.CalculateTestUMannWhitney(tableDouble4, tableDouble3).PValue;
 
             Assert.AreEqual(8.5, w43);
             Assert.AreEqual(0.7656, w43PValue);
 
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateTestUMannaWhitneya(emptyTable,emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateTestUMannWhitney(emptyTable,emptyTable));
 
         }
         [TestMethod]
-        public void TestUMannaWhitneyaInt()
+        public void TestUMannWhitneyInt()
         {
             //in RStudio to samo co wilcox.test(d1,d4)
 
-            double w13 = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt3).T;
-            double w13PValue = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt3).PValue;
+            double w13 = Statystyki.CalculateTestUMannWhitney(tableInt1, tableInt3).T;
+            double w13PValue = Statystyki.CalculateTestUMannWhitney(tableInt1, tableInt3).PValue;
             Assert.AreEqual(20.5, w13);
             Assert.AreEqual(0.1015, w13PValue);
 
 
-            double w14 = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt4).T;
-            double w14PValue = Statystyki.CalculateTestUMannaWhitneya(tableInt1, tableInt4).PValue;
+            double w14 = Statystyki.CalculateTestUMannWhitney(tableInt1, tableInt4).T;
+            double w14PValue = Statystyki.CalculateTestUMannWhitney(tableInt1, tableInt4).PValue;
 
             Assert.AreEqual(17, w14);
             Assert.AreEqual(0.0948, w14PValue);
 
-            double w43 = Statystyki.CalculateTestUMannaWhitneya(tableInt4, tableInt3).T;
-            double w43PValue = Statystyki.CalculateTestUMannaWhitneya(tableInt4, tableInt3).PValue;
+            double w43 = Statystyki.CalculateTestUMannWhitney(tableInt4, tableInt3).T;
+            double w43PValue = Statystyki.CalculateTestUMannWhitney(tableInt4, tableInt3).PValue;
 
             Assert.AreEqual(8.5, w43);
             Assert.AreEqual(0.7656, w43PValue);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateTestUMannaWhitneya(emptyTable, emptyTable));
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateTestUMannWhitney(emptyTable, emptyTable));
 
         }
         [TestMethod]
@@ -739,17 +739,17 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestShapiroWilkTestDouble()
         {
-            double w1 = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble1).TestValue;
-            double w1PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble1).PValue;
+            double w1 = Statystyki.CalculateShapiroWilkTest(tableDouble1).TestValue;
+            double w1PVal = Statystyki.CalculateShapiroWilkTest(tableDouble1).PValue;
 
-            double w2 = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble2).TestValue;
-            double w2PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble2).PValue;
+            double w2 = Statystyki.CalculateShapiroWilkTest(tableDouble2).TestValue;
+            double w2PVal = Statystyki.CalculateShapiroWilkTest(tableDouble2).PValue;
 
-            double w3 = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble3).TestValue;
-            double w3PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble3).PValue;
+            double w3 = Statystyki.CalculateShapiroWilkTest(tableDouble3).TestValue;
+            double w3PVal = Statystyki.CalculateShapiroWilkTest(tableDouble3).PValue;
 
-            double w4 = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble4).TestValue;
-            double w4PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableDouble4).PValue;
+            double w4 = Statystyki.CalculateShapiroWilkTest(tableDouble4).TestValue;
+            double w4PVal = Statystyki.CalculateShapiroWilkTest(tableDouble4).PValue;
 
 
             //shapiro.test(d1)
@@ -769,17 +769,17 @@ namespace TestAnalizaWyników
         [TestMethod]
         public void TestShapiroWilkTestInt()
         {
-            double w1 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt1).TestValue;
-            double w1PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt1).PValue;
+            double w1 = Statystyki.CalculateShapiroWilkTest(tableInt1).TestValue;
+            double w1PVal = Statystyki.CalculateShapiroWilkTest(tableInt1).PValue;
 
-            double w2 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt2).TestValue;
-            double w2PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt2).PValue;
+            double w2 = Statystyki.CalculateShapiroWilkTest(tableInt2).TestValue;
+            double w2PVal = Statystyki.CalculateShapiroWilkTest(tableInt2).PValue;
 
-            double w3 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt3).TestValue;
-            double w3PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt3).PValue;
+            double w3 = Statystyki.CalculateShapiroWilkTest(tableInt3).TestValue;
+            double w3PVal = Statystyki.CalculateShapiroWilkTest(tableInt3).PValue;
 
-            double w4 = Statystyki.CalculateShapiroWilkTestForNormality(tableInt4).TestValue;
-            double w4PVal = Statystyki.CalculateShapiroWilkTestForNormality(tableInt4).PValue;
+            double w4 = Statystyki.CalculateShapiroWilkTest(tableInt4).TestValue;
+            double w4PVal = Statystyki.CalculateShapiroWilkTest(tableInt4).PValue;
 
 
             //shapiro.test(d1)
@@ -797,23 +797,23 @@ namespace TestAnalizaWyników
             Assert.AreEqual(0.00124, w4PVal);
         }
         [TestMethod]
-        public void TestKruskalaWalisaTestDouble()
+        public void TestKruskalWalisTestDouble()
         {
-            double ch13 = Statystyki.CalculateKruskalaWalisaTest(tableDouble1, tableDouble3).TestValue;
-            double ch13PVal = Statystyki.CalculateKruskalaWalisaTest(tableDouble1, tableDouble3).PValue;
-            double ch13Df = Statystyki.CalculateKruskalaWalisaTest(tableDouble1, tableDouble3).DegreesOfFreedom;
+            double ch13 = Statystyki.CalculateKruskalWalisTest(tableDouble1, tableDouble3).TestValue;
+            double ch13PVal = Statystyki.CalculateKruskalWalisTest(tableDouble1, tableDouble3).PValue;
+            double ch13Df = Statystyki.CalculateKruskalWalisTest(tableDouble1, tableDouble3).DegreesOfFreedom;
 
-            double ch31 = Statystyki.CalculateKruskalaWalisaTest(tableDouble3, tableDouble1).TestValue;
-            double ch31PVal = Statystyki.CalculateKruskalaWalisaTest(tableDouble3, tableDouble1).PValue;
-            double ch31Df = Statystyki.CalculateKruskalaWalisaTest(tableDouble3, tableDouble1).DegreesOfFreedom;
+            double ch31 = Statystyki.CalculateKruskalWalisTest(tableDouble3, tableDouble1).TestValue;
+            double ch31PVal = Statystyki.CalculateKruskalWalisTest(tableDouble3, tableDouble1).PValue;
+            double ch31Df = Statystyki.CalculateKruskalWalisTest(tableDouble3, tableDouble1).DegreesOfFreedom;
 
-            double ch24 = Statystyki.CalculateKruskalaWalisaTest(tableDouble2, tableDouble4).TestValue;
-            double ch24PVal = Statystyki.CalculateKruskalaWalisaTest(tableDouble2, tableDouble4).PValue;
-            double ch24Df = Statystyki.CalculateKruskalaWalisaTest(tableDouble2, tableDouble4).DegreesOfFreedom;
+            double ch24 = Statystyki.CalculateKruskalWalisTest(tableDouble2, tableDouble4).TestValue;
+            double ch24PVal = Statystyki.CalculateKruskalWalisTest(tableDouble2, tableDouble4).PValue;
+            double ch24Df = Statystyki.CalculateKruskalWalisTest(tableDouble2, tableDouble4).DegreesOfFreedom;
 
-            double ch42 = Statystyki.CalculateKruskalaWalisaTest(tableDouble4, tableDouble2).TestValue;
-            double ch42PVal = Statystyki.CalculateKruskalaWalisaTest(tableDouble4, tableDouble2).PValue;
-            double ch42Df = Statystyki.CalculateKruskalaWalisaTest(tableDouble4, tableDouble2).DegreesOfFreedom;
+            double ch42 = Statystyki.CalculateKruskalWalisTest(tableDouble4, tableDouble2).TestValue;
+            double ch42PVal = Statystyki.CalculateKruskalWalisTest(tableDouble4, tableDouble2).PValue;
+            double ch42Df = Statystyki.CalculateKruskalWalisTest(tableDouble4, tableDouble2).DegreesOfFreedom;
 
             Assert.AreEqual(3, ch13);
             Assert.AreEqual(0.0833, ch13PVal);
@@ -832,23 +832,23 @@ namespace TestAnalizaWyników
             Assert.AreEqual(3, ch42Df);
         }
         [TestMethod]
-        public void TestKruskalaWalisaTestInt()
+        public void TestKruskalWalisTestInt()
         {
-            double ch13 = Statystyki.CalculateKruskalaWalisaTest(tableInt1, tableInt3).TestValue;
-            double ch13PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt1, tableInt3).PValue;
-            double ch13Df = Statystyki.CalculateKruskalaWalisaTest(tableInt1, tableInt3).DegreesOfFreedom;
+            double ch13 = Statystyki.CalculateKruskalWalisTest(tableInt1, tableInt3).TestValue;
+            double ch13PVal = Statystyki.CalculateKruskalWalisTest(tableInt1, tableInt3).PValue;
+            double ch13Df = Statystyki.CalculateKruskalWalisTest(tableInt1, tableInt3).DegreesOfFreedom;
 
-            double ch31 = Statystyki.CalculateKruskalaWalisaTest(tableInt3, tableInt1).TestValue;
-            double ch31PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt3, tableInt1).PValue;
-            double ch31Df = Statystyki.CalculateKruskalaWalisaTest(tableInt3, tableInt1).DegreesOfFreedom;
+            double ch31 = Statystyki.CalculateKruskalWalisTest(tableInt3, tableInt1).TestValue;
+            double ch31PVal = Statystyki.CalculateKruskalWalisTest(tableInt3, tableInt1).PValue;
+            double ch31Df = Statystyki.CalculateKruskalWalisTest(tableInt3, tableInt1).DegreesOfFreedom;
 
-            double ch24 = Statystyki.CalculateKruskalaWalisaTest(tableInt2, tableInt4).TestValue;
-            double ch24PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt2, tableInt4).PValue;
-            double ch24Df = Statystyki.CalculateKruskalaWalisaTest(tableInt2, tableInt4).DegreesOfFreedom;
+            double ch24 = Statystyki.CalculateKruskalWalisTest(tableInt2, tableInt4).TestValue;
+            double ch24PVal = Statystyki.CalculateKruskalWalisTest(tableInt2, tableInt4).PValue;
+            double ch24Df = Statystyki.CalculateKruskalWalisTest(tableInt2, tableInt4).DegreesOfFreedom;
 
-            double ch42 = Statystyki.CalculateKruskalaWalisaTest(tableInt4, tableInt2).TestValue;
-            double ch42PVal = Statystyki.CalculateKruskalaWalisaTest(tableInt4, tableInt2).PValue;
-            double ch42Df = Statystyki.CalculateKruskalaWalisaTest(tableInt4, tableInt2).DegreesOfFreedom;
+            double ch42 = Statystyki.CalculateKruskalWalisTest(tableInt4, tableInt2).TestValue;
+            double ch42PVal = Statystyki.CalculateKruskalWalisTest(tableInt4, tableInt2).PValue;
+            double ch42Df = Statystyki.CalculateKruskalWalisTest(tableInt4, tableInt2).DegreesOfFreedom;
 
             Assert.AreEqual(3, ch13);
             Assert.AreEqual(0.0833, ch13PVal);
@@ -899,7 +899,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(f24numDf, 3);
             Assert.AreEqual(f24DenomDf, 3);
             Assert.AreEqual(f24pVal, 0.15353);
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, emptyTable).RatioOfVariances);
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateFTestToCompareTwoVariances(tableDouble2, emptyTable).RatioOfVariances);
 
         }
         [TestMethod]
@@ -936,7 +936,7 @@ namespace TestAnalizaWyników
             Assert.AreEqual(f24DenomDf, 3);
             Assert.AreEqual(f24pVal, 0.15353);
 
-            Assert.ThrowsException<EmptyListException>(() => Statystyki.CalculateFTestToCompareTwoVariances(emptyTableInt, tableInt4).RatioOfVariances);
+            Assert.ThrowsException<EmptyCollectionException>(() => Statystyki.CalculateFTestToCompareTwoVariances(emptyTableInt, tableInt4).RatioOfVariances);
         }
         [TestMethod]
         public void ChiSquaredTestDouble()

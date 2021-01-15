@@ -4,15 +4,15 @@ namespace PracaInzynierska
 {
 
     [Serializable]
-    public class EmptyListException : Exception
+    public class EmptyCollectionException : Exception
     {
-        public EmptyListException():base(String.Format("The list does not contain items")) { }
+        public EmptyCollectionException():base(String.Format("The list does not contain items")) { }
     }
 
     [Serializable]
-    public class NotTheSameLengthException : Exception
+    public class SizeOutOfRangeException : Exception
     {
-        public NotTheSameLengthException() : base(String.Format("The collection must be the same length")) { }
+        public SizeOutOfRangeException() : base(String.Format("The collection must be the same length")) { }
     }
 
     [Serializable]

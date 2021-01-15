@@ -32,12 +32,18 @@ namespace PracaInzynierska
             List<double> list = new List<double>{ 1, 1, 1, 2, 2 };
 
             double q1 = 0, q2 = 0, q3 = 0;
-            double chi_sqrt= Statystyki.CalculatePearsonsCorrelationCoefficient(t1,t2).StudentsTValue;
+            double chi_sqrt= Statystyki.CalculatePearsonsCorrelation(t1,t2).StudentsTValue;
             // double pval = Statystyki.CalculateKruskalaWalisaTest(tablicaDouble2, tablicaDouble4).PValue;
 
             double ss = (54 * 54 * (1 - 0.6727273 * 0.6727273)) / 0.6727273 * 0.6727273 + 2;
             double pval = ContinuousDistribution.Student(0.975, 3);
-            Console.WriteLine("pp " + pval);
+
+
+            double[]a1 = {6,8,4,5,3,4  };
+            double[] a2 = {8,12,9,11,6,8  };
+            double[] a3 = {13,9,11,8,7,12 };
+            double anova = ANOVA.OneWayAnalysisOfVariance(a1,a2,a3).TestValue;
+            Console.WriteLine("anova " + anova);
 
             //Console.WriteLine("pval " + pval);
             //Console.WriteLine("Max " + Statystyki.CalculateWilcoxonTest(tablicaDouble1, tablicaDouble2).SumOfPositiveRanks);

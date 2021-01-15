@@ -287,7 +287,7 @@ namespace PracaInzynierska.Distribution
 
             return GI;
         }
-        public static double ChisquareCdf(double x, int df)
+        public static double ChiSquareCdf(double x, int df)
         {
             if (df <= 0)
             {

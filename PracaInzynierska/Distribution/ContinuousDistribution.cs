@@ -116,10 +116,10 @@ namespace PracaInzynierska.Distribution
                 a = -a;
             }
 
-            int sanityCt = 0;
-            while (true && sanityCt < 10000)
+            int nCt = 0;
+            while (true && nCt < 10000)
             {
-                ++sanityCt;
+                ++nCt;
                 n = n - 2;
                 if (n > 1)
                 {
@@ -216,45 +216,45 @@ namespace PracaInzynierska.Distribution
         //Internal function used by gammaCdf
         private static double GCdf(double x, double A)
         {
-            // Good for X>A+1
-            double A0 = 0;
-            double B0 = 1;
-            double A1 = 1;
-            double B1 = x;
-            double AOLD = 0;
+            // Good for x>a+1
+            double a = 0;
+            double b = 1;
+            double a1 = 1;
+            double b1 = x;
+            double aOld = 0;
             double N = 0;
-            while (Math.Abs((A1 - AOLD) / A1) > .00001)
+            while (Math.Abs((a1 - aOld) / a1) > .00001)
             {
-                AOLD = A1;
+                aOld = a1;
                 N = N + 1;
-                A0 = A1 + (N - A) * A0;
-                B0 = B1 + (N - A) * B0;
-                A1 = x * A0 + N * A1;
-                B1 = x * B0 + N * B1;
-                A0 = A0 / B1;
-                B0 = B0 / B1;
-                A1 = A1 / B1;
-                B1 = 1;
+                a = a1 + (N - A) * a;
+                b = b1 + (N - A) * b;
+                a1 = x * a + N * a1;
+                b1 = x * b + N * b1;
+                a = a / b1;
+                b = b / b1;
+                a1 = a1 / b1;
+                b1 = 1;
             }
-            double Prob = Math.Exp(A * Math.Log(x) - x - LogGamma(A)) * A1;
+            double Prob = Math.Exp(A * Math.Log(x) - x - LogGamma(A)) * a1;
 
             return 1.0 - Prob;
         }
         private static double gSer(double x, double A)
         {
-            // Good for X<A+1.
-            double T9 = 1 / A;
-            double G = T9;
-            double I = 1;
-            while (T9 > G * 0.00001)
+            // Good for x<a+1.
+            double temp = 1 / A;
+            double g = temp;
+            double i = 1;
+            while (temp > g * 0.00001)
             {
-                T9 = T9 * x / (A + I);
-                G = G + T9;
-                ++I;
+                temp = temp * x / (A + i);
+                g = g + temp;
+                ++i;
             }
-            G = G * Math.Exp(A * Math.Log(x) - x - LogGamma(A));
+            g = g * Math.Exp(A * Math.Log(x) - x - LogGamma(A));
 
-            return G;
+            return g;
         }
         public static double Gamma(double x, double a)
         {
@@ -263,29 +263,29 @@ namespace PracaInzynierska.Distribution
                 throw new ArgumentException("The x parameter must be positive.");
             }
 
-            double GI;
+            double gamma;
             if (a > 200)
             {
                 double z = (x - a) / Math.Sqrt(a);
                 double y = Gauss(z);
                 double b1 = 2 / Math.Sqrt(a);
                 double phiz = 0.39894228 * Math.Exp(-z * z / 2);
-                double w = y - b1 * (z * z - 1) * phiz / 6;  //Edgeworth1
+                double w = y - b1 * (z * z - 1) * phiz / 6;  
                 double b2 = 6 / a;
                 int zXor4 = ((int)z) ^ 4;
                 double u = 3 * b2 * (z * z - 3) + b1 * b1 * (zXor4 - 10 * z * z + 15);
-                GI = w - phiz * z * u / 72;        //Edgeworth2
+                gamma = w - phiz * z * u / 72;       
             }
             else if (x < a + 1)
             {
-                GI = gSer(x, a);
+                gamma = gSer(x, a);
             }
             else
             {
-                GI = GCdf(x, a);
+                gamma = GCdf(x, a);
             }
 
-            return GI;
+            return gamma;
         }
         public static double ChiSquareCdf(double x, int df)
         {
@@ -297,31 +297,30 @@ namespace PracaInzynierska.Distribution
             return Gamma(x / 2.0, df / 2.0);
         }
 
-        //Internal function used by StudentCdf
         public static double Betinc(double x, double A, double B)
         {
-            double A0 = 0.0;
-            double B0 = 1.0;
-            double A1 = 1.0;
-            double B1 = 1.0;
-            double M9 = 0.0;
-            double A2 = 0.0;
-            while (Math.Abs((A1 - A2) / A1) > 0.00001)
+            double a = 0.0;
+            double b = 1.0;
+            double a1 = 1.0;
+            double b1 = 1.0;
+            double temp = 0.0;
+            double a2 = 0.0;
+            while (Math.Abs((a1 - a2) / a1) > 0.00001)
             {
-                A2 = A1;
-                double C9 = -(A + M9) * (A + B + M9) * x / (A + 2.0 * M9) / (A + 2.0 * M9 + 1.0);
-                A0 = A1 + C9 * A0;
-                B0 = B1 + C9 * B0;
-                M9 = M9 + 1;
-                C9 = M9 * (B - M9) * x / (A + 2.0 * M9 - 1.0) / (A + 2.0 * M9);
-                A1 = A0 + C9 * A1;
-                B1 = B0 + C9 * B1;
-                A0 = A0 / B1;
-                B0 = B0 / B1;
-                A1 = A1 / B1;
-                B1 = 1.0;
+                a2 = a1;
+                double c = -(A + temp) * (A + B + temp) * x / (A + 2.0 * temp) / (A + 2.0 * temp + 1.0);
+                a = a1 + c * a;
+                b = b1 + c * b;
+                temp = temp + 1;
+                c = temp * (B - temp) * x / (A + 2.0 * temp - 1.0) / (A + 2.0 * temp);
+                a1 = a + c * a1;
+                b1 = b + c * b1;
+                a = a / b1;
+                b = b / b1;
+                a1 = a1 / b1;
+                b1 = 1.0;
             }
-            return A1 / A;
+            return a1 / A;
         }
         public static double Beta(double x, double a, double b)
         {
@@ -338,20 +337,19 @@ namespace PracaInzynierska.Distribution
             }
             else if (x >= 1)
             {
-                beta = 1.0;
-                return beta;
+                return 1.0;
             }
 
-            double S = a + b;
+            double s = a + b;
 
-            double BT = Math.Exp(LogGamma(S) - LogGamma(b) - LogGamma(a) + a * Math.Log(x) + b * Math.Log(1 - x));
-            if (x < (a + 1.0) / (S + 2.0))
+            double btemp = Math.Exp(LogGamma(s) - LogGamma(b) - LogGamma(a) + a * Math.Log(x) + b * Math.Log(1 - x));
+            if (x < (a + 1.0) / (s + 2.0))
             {
-                beta = BT * Betinc(x, a, b);
+                beta = btemp * Betinc(x, a, b);
             }
             else
             {
-                beta = 1.0 - BT * Betinc(1.0 - x, b, a);
+                beta = 1.0 - btemp * Betinc(1.0 - x, b, a);
             }
 
             return beta;

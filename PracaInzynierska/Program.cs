@@ -49,8 +49,8 @@ namespace PracaInzynierska
             double[] k1 = { 3415,1593,1976,1526,1538,983,1050,1861,1714,1320,1276,1263,1271,1436};
             double[] k2 = { 4556,1937,2056,1594,1634,1086,1209,2087,2415,1621,1377,1279,1417,1310};
             double[] k3 = {5772,2242,2240,1644,1866,1135,1245,2054,2361,1624,1522,1350,1583,1357};
-            double[] k4 = {5432,2794,2085,1705,1769,1177,977,2018,2424,1551,1412,1490,1513,1468};
-            double anova = ANOVA.AnovaFriedmanaTest(k1,k2,k3,k4).TestValue;
+            double[] k4 = { 5772, 2794,2085,1705,1769,1177,977,2018,2424,1551,1412,1490,1513,1468};
+            double anova = ANOVA.OneWayAnalysisOfVariance(a1, a2, a3).TestValue;
             Console.WriteLine("anova " + anova);
 
 

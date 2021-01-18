@@ -1165,7 +1165,5 @@ namespace PracaInzynierska.Statystyka
                 PValue = Math.Round(pval, 5)
             };
         }
-
-      
     }
 }

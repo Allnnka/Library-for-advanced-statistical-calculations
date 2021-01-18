@@ -27,36 +27,36 @@ namespace PracaInzynierska
         }
         public static AnovaResult OneWayAnalysisOfVariance(params IEnumerable<double>[] args)
         {
-            int r = args.Length;
-            int ni = args.FirstOrDefault().Count();
-            int n = r*ni;
-            foreach (IEnumerable<double> list in args)
+            if (args.Length == 1) throw new ArgumentException("Need at least two collection");
+            foreach (IEnumerable<double> item in args)
             {
-                if (ni != list.Count()) throw new SizeOutOfRangeException();
+                if (item.Count()==0) throw new EmptyCollectionException();
             }
-
+            int r = args.Length;
+            int N=0;
+            
             List<double> meanInEachGroup = new List<double>();
             double ssWG = 0;
             int nmean = 0;
             foreach (IEnumerable<double> list in args)
             {
                 meanInEachGroup.Add(list.Average());
-                for (int i = 0; i < ni; i++)
+                for (int i = 0; i < list.Count(); i++)
                 {
                     ssWG += (list.ElementAt(i) - meanInEachGroup.ElementAt(nmean))* (list.ElementAt(i) - meanInEachGroup.ElementAt(nmean));
                 }
                 nmean++;
-                
+                N += list.Count();
             }
             double overallMean = meanInEachGroup.Sum() / meanInEachGroup.Count();
             double ssBG = 0;
-            foreach(double item in meanInEachGroup)
+            for (int i = 0; i < meanInEachGroup.Count(); i++)
             {
-                ssBG += ni * (item - overallMean) * (item - overallMean);
+                ssBG += (double)args[i].Count() * (meanInEachGroup.ElementAt(i) - overallMean) * (meanInEachGroup.ElementAt(i) - overallMean);
             }
             double dfBG = r - 1;
             double msBG = ssBG / dfBG;
-            double dfWG = r*(ni-1);
+            double dfWG = N-1-dfBG;
             double msWG = ssWG / dfWG;
             double statistic = msBG / msWG;
             double p = ContinuousDistribution.FCdf(statistic, (int)dfBG, (int)dfWG);
@@ -66,11 +66,11 @@ namespace PracaInzynierska
                 TestValue = Math.Round(statistic,3),
                 Dfbg=dfBG,
                 Dfwg=dfWG,
-                MsBG=msBG,
-                MsWG=msWG,
-                SsBG=ssBG,
-                SsWG=ssWG,
-                PValue=p
+                MsBG= Math.Round(msBG,3),
+                MsWG= Math.Round(msWG,3),
+                SsBG= Math.Round(ssBG,3),
+                SsWG= Math.Round(ssWG,3),
+                PValue=Math.Round(p,4)
             };
         }
         //public static AnovaResult OneWayAnalysisOfVariance(params IEnumerable<double>[] args)
@@ -92,6 +92,7 @@ namespace PracaInzynierska
 
         public static TestResult AnovaKruskalWalisTest(params IEnumerable<double>[] args)
         {
+            if (args.Length == 1) throw new ArgumentException("Need at least two collection");
             int n = 0;
             List<double> list = new List<double>();
             foreach(IEnumerable<double> el in args)
@@ -132,23 +133,26 @@ namespace PracaInzynierska
         {
 
             int n = args.FirstOrDefault().Count();
-            int k= args.Length;
+            int p= args.Length;
+            if (args.Length == 1) throw new ArgumentException("Need at least two collection");
             foreach (IEnumerable<double> item in args)
             {
                 if (n != item.Count()) throw new SizeOutOfRangeException();
             }
             List<double> list = new List<double>();
-            List<double> sumRj = Enumerable.Repeat<double>(0, k).ToList();
-            Dictionary<double, double> dictOfPairs= new Dictionary<double, double>(); 
+            List<double> sumRj = Enumerable.Repeat<double>(0, p).ToList();
+            Dictionary<double, double> dictOfPairs= new Dictionary<double, double>();
 
+            double sumCorrectionForTiedRanks = 0;
             for (int i = 0; i < n; i++)
             {
                 foreach(IEnumerable<double> el in args)
                 {
                     list.Add(el.ElementAt(i));
                 }
+                sumCorrectionForTiedRanks += Ranks.SumOfTiedPairs(list);
                 dictOfPairs =Ranks.CalculateRanks(list);
-                for(int j = 0; j < k; j++)
+                for(int j = 0; j < p; j++)
                 {
                     sumRj[j]+= dictOfPairs[Math.Abs(list.ElementAt(j))];
                 }
@@ -159,15 +163,15 @@ namespace PracaInzynierska
             {
                 totalSum += element * element;
             }
-            Console.WriteLine("Total sum " + totalSum);
-            double kwScore = ((12.0 * totalSum) / (n*k * (k + 1.0)) - 3.0 * n*(k + 1.0));
-            int df = (int)k- 1;
-            double pVal = 1.0 - ContinuousDistribution.ChiSquareCdf(kwScore, df);
-            Console.WriteLine("Pval" + pVal);
+            double kwScore = ((12.0 * totalSum) / (n*p * (p + 1.0)) - 3.0 * n*(p + 1.0));
+            int df = (int)p- 1;
+            double correctionForTied = 1.0 - sumCorrectionForTiedRanks / (n *( p * p*p - p));
+            double statistics = kwScore / correctionForTied;
+            double pVal = 1.0 - ContinuousDistribution.ChiSquareCdf(statistics, df);
             return new TestResult
             {
-                TestValue = Math.Round(kwScore, 4),
-                PValue = Math.Round(pVal, 6),
+                TestValue = Math.Round(statistics, 4),
+                PValue = Math.Round(pVal, 5),
                 DegreesOfFreedom = df
             };
         }

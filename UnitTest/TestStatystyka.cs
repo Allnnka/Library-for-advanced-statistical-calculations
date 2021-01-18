@@ -1042,5 +1042,60 @@ namespace TestAnalizaWyników
             Assert.AreEqual(p24pVal, 0.2254);
 
         }
+
+        [TestMethod]
+        public void TestFriedmanTest()
+        {
+            double f131 = ANOVA.AnovaFriedmanaTest(tableDouble1,tableDouble3, tableDouble1).TestValue;
+            double f131df = ANOVA.AnovaFriedmanaTest(tableDouble1, tableDouble3, tableDouble1).DegreesOfFreedom;
+            double f131Pval = ANOVA.AnovaFriedmanaTest(tableDouble1, tableDouble3, tableDouble1).PValue;
+
+            Assert.AreEqual(f131,8);
+            Assert.AreEqual(f131df, 2);
+            Assert.AreEqual(f131Pval, 0.01832);
+
+            double f2424 = ANOVA.AnovaFriedmanaTest(tableDouble2, tableDouble4, tableDouble2, tableDouble4).TestValue;
+            double f2424Df = ANOVA.AnovaFriedmanaTest(tableDouble2, tableDouble4, tableDouble2, tableDouble4).DegreesOfFreedom;
+            double f2424Pval = ANOVA.AnovaFriedmanaTest(tableDouble2, tableDouble4, tableDouble2, tableDouble4).PValue;
+
+            Assert.AreEqual(f2424, 9);
+            Assert.AreEqual(f2424Df, 3);
+            Assert.AreEqual(f2424Pval, 0.02929);
+
+            Assert.ThrowsException<SizeOutOfRangeException>(() => ANOVA.AnovaFriedmanaTest(tableDouble2, tableDouble3).TestValue);
+
+        }
+        [TestMethod]
+        public void TestOneWayAnalysisOfVariance()
+        {
+            double f = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3,tableDouble4).TestValue;
+            double fssbg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).SsBG;
+            double fsswg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).SsWG;
+
+            double fmsbg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).MsBG;
+            double fmswg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).MsWG;
+
+            double fdfbg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).Dfbg;
+            double fdfwg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).Dfwg;
+
+            double fPval = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).PValue;
+
+            //Assert.AreEqual(f, 2.752);
+            //Assert.AreEqual(fssbg, 9.994);
+            //Assert.AreEqual(fsswg, 16.950);
+
+            //Assert.AreEqual(fmsbg, 3.331);
+            //Assert.AreEqual(fmswg, 1.211);
+
+            //Assert.AreEqual(fdfbg, 3);
+            //Assert.AreEqual(fdfwg, 14);
+            //Assert.AreEqual(fPval, 0.0819);
+
+            double f13 = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble3).TestValue;
+            double f13pval = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble3).PValue;
+
+            Assert.AreEqual(f13, 4.571);
+            Assert.AreEqual(f13pval, 0.065);
+        }
     }
 }

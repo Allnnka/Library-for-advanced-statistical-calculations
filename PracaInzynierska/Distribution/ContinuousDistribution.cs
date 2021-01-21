@@ -10,9 +10,6 @@ namespace PracaInzynierska.Distribution
     {
         public static double Gauss(double z)
         {
-            // input = z-value (-inf to +inf)
-            // output = p under Standard Normal curve from -inf to z
-            // e.g., if z = 0.0, function returns 0.5000
             // ACM Algorithm #209
             double y; // 209 scratch variable
             double p; // result. called 'z' in 209
@@ -135,8 +132,8 @@ namespace PracaInzynierska.Distribution
                 return z - a;
             }
 
-            return -1.0; // error
-        } // Student (int df)
+            return -1.0;
+        } 
 
         public static double NormalQuantile(double p, double mu, double sigma)
         {
@@ -163,21 +160,20 @@ namespace PracaInzynierska.Distribution
                     + 21213.794301586595867) * r + 5394.1960214247511077) * r + 687.1870074920579083) * r + 42.313330701600911252) * r + 1);
             }
             else
-            { /* closer than 0.075 from {0,1} boundary */
-                /* r = min(p, 1-p) < 0.075 */
+            { 
                 if (q > 0)
                 {
                     r = 1 - p;
                 }
                 else
                 {
-                    r = p;/* = R_DT_Iv(p) ^=  p */
+                    r = p;
                 }
 
-                r = Math.Sqrt(-Math.Log(r)); /* r = sqrt(-log(r))  <==>  min(p, 1-p) = exp( - r^2 ) */
+                r = Math.Sqrt(-Math.Log(r));
 
                 if (r <= 5.0)
-                { /* <==> min(p,1-p) >= exp(-25) ~= 1.3888e-11 */
+                { 
                     r += -1.6;
                     val = (((((((r * 7.7454501427834140764e-4 + 0.0227238449892691845833) * r + 0.24178072517745061177) * r
                         + 1.27045825245236838258) * r + 3.64784832476320460504) * r + 5.7694972214606914055) * r
@@ -186,7 +182,7 @@ namespace PracaInzynierska.Distribution
                         + 2.05319162663775882187) * r + 1.0);
                 }
                 else
-                { /* very close to  0 or 1 */
+                { 
                     r += -5.0;
                     val = (((((((r * 2.01033439929228813265e-7 + 2.71155556874348757815e-5) * r + 0.0012426609473880784386) * r
                         + 0.026532189526576123093) * r + 0.29656057182850489123) * r + 1.7848265399172913358) * r + 5.4637849111641143699) * r
@@ -199,7 +195,6 @@ namespace PracaInzynierska.Distribution
                 {
                     val = -val;
                 }
-                /* return (q >= 0.)? r : -r ;*/
             }
             return mu + sigma * val;
         }

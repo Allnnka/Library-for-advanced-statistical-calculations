@@ -1069,27 +1069,17 @@ namespace TestAnalizaWyników
         public void TestOneWayAnalysisOfVariance()
         {
             double f = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3,tableDouble4).TestValue;
-            double fssbg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).SsBG;
-            double fsswg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).SsWG;
-
-            double fmsbg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).MsBG;
-            double fmswg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).MsWG;
 
             double fdfbg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).Dfbg;
             double fdfwg = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).Dfwg;
 
             double fPval = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble2, tableDouble3, tableDouble4).PValue;
 
-            //Assert.AreEqual(f, 2.752);
-            //Assert.AreEqual(fssbg, 9.994);
-            //Assert.AreEqual(fsswg, 16.950);
-
-            //Assert.AreEqual(fmsbg, 3.331);
-            //Assert.AreEqual(fmswg, 1.211);
-
-            //Assert.AreEqual(fdfbg, 3);
-            //Assert.AreEqual(fdfwg, 14);
-            //Assert.AreEqual(fPval, 0.0819);
+            Assert.AreEqual(f, 2.753);
+            
+            Assert.AreEqual(fdfbg, 3);
+            Assert.AreEqual(fdfwg, 14);
+            Assert.AreEqual(fPval, 0.0818);
 
             double f13 = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble3).TestValue;
             double f13pval = ANOVA.OneWayAnalysisOfVariance(tableDouble1, tableDouble3).PValue;

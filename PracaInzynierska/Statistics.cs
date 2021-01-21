@@ -652,9 +652,6 @@ namespace PracaInzynierska.Statystyka
         }
         private static double poly(double[] cc, int nord, double x)
         {
-            /* Algorithm AS 181.2    Appl. Statist.    (1982) Vol. 31, No. 2
-            Calculates the algebraic polynomial of order nord-1 with array of coefficients cc. 
-            Zero order coefficient is cc(1) = cc[0] */
 
             double ret_val = cc[0];
             if (nord > 1)
@@ -696,7 +693,6 @@ namespace PracaInzynierska.Statystyka
             double[] nlg = { -1.5861, -0.31082, -0.083751, 0.0038915 };
             double[] slg= { -0.4803, -0.082676, 0.0030302 };
 
-            /* Local variables */
             int i, j, i1;
 
             double ssassx, summ2, ssumm2, gamma, range;
@@ -716,7 +712,7 @@ namespace PracaInzynierska.Statystyka
                 summ2 = 0.0;
                 for (i = 1; i <= nn2; i++)
                 {
-                    a[i] = ContinuousDistribution.NormalQuantile((i - 0.375) / an25, 0, 1); // p(X <= x),  
+                    a[i] = ContinuousDistribution.NormalQuantile((i - 0.375) / an25, 0, 1); 
                     summ2 += a[i] * a[i];
                 }
                 summ2 *= 2.0;
@@ -724,7 +720,7 @@ namespace PracaInzynierska.Statystyka
                 rsn = 1.0 / Math.Sqrt(an);
                 a1 = poly(c1, 6, rsn) - a[1] / ssumm2;
 
-                /* Normalize a[] */
+
                 if (n > 5)
                 {
                     i1 = 3;
@@ -744,15 +740,11 @@ namespace PracaInzynierska.Statystyka
                 }
             }
 
-            /* Check for zero range */
-
             range = list.ElementAt(n - 1) - list.ElementAt(0);
             if (range < small)
                 throw new NotTheRightSizeException();
 
 
-
-            /* Check for correct sort order on range - scaled X */
 
             xx = list.ElementAt(0) / range;
             sx = xx;
@@ -762,7 +754,6 @@ namespace PracaInzynierska.Statystyka
                 xi = list.ElementAt(i) / range;
                 if (xx - xi > small)
                 {
-                    //console.log("xx - xi is too big.", xx - xi); 
                     throw new ArgumentException();
                 }
                 sx += xi;
@@ -774,8 +765,6 @@ namespace PracaInzynierska.Statystyka
                 xx = xi;
             }
 
-
-            /* Calculate W statistic as squared correlation between data and coefficients */
 
             sa /= n;
             sx /= n;
@@ -795,19 +784,15 @@ namespace PracaInzynierska.Statystyka
                 ssx += xsx * xsx;
                 sax += asa * xsx;
             }
-
-            /* W1 equals (1-W) calculated to avoid excessive rounding error for W very near 1 (a potential problem in very large samples) */
-
             ssassx = Math.Sqrt(ssa * ssx);
             w1 = (ssassx - sax) * (ssassx + sax) / (ssa * ssx);
             double w = 1.0 - w1;
             double pValue=0;
-            /* Calculate significance level for W */
 
             if (n == 3)
-            {/* exact P value : */
-                double pi6 = 1.90985931710274; /* = 6/pi */
-                double stqr = 1.04719755119660; /* = asin(sqrt(3/4)) */
+            {
+                double pi6 = 1.90985931710274; 
+                double stqr = 1.04719755119660; 
                 pw = pi6 * (Math.Asin(Math.Sqrt(w)) - stqr);
                 if (pw < 0)
                 {
@@ -830,7 +815,7 @@ namespace PracaInzynierska.Statystyka
                 s = Math.Exp(poly(ssmall, 4, an));
             }
             else
-            { /* n >= 12 */
+            { 
                 m = poly(nlg, 4, xx);
                 s = Math.Exp(poly(slg, 3, xx));
             }
@@ -940,9 +925,6 @@ namespace PracaInzynierska.Statystyka
             public int DenomDf;
             public double PValue;
         }
-
-        //Use F test to compare two variances
-        //
         public static FTest _calculateFTestToCompareTwoVariances(List<double> list1, List<double> list2)
         {
             int n = list1.Count();

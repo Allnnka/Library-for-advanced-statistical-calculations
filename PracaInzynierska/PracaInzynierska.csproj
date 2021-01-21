@@ -47,7 +47,6 @@
     <Compile Include="DescriptiveStatistics\Ranks.cs" />
     <Compile Include="Distribution\ContinuousDistribution.cs" />
     <Compile Include="ProgramExceptions.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statistics.cs" />
     <Compile Include="Util.cs" />
